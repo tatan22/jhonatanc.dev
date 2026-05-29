@@ -33,7 +33,7 @@ export function Hero() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6 }}
-						className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm text-foreground/80 shadow-lg shadow-accent/10 mb-8"
+							className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm text-foreground/80 shadow-lg shadow-accent/10 mb-8"
 						>
 							<span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
 							Disponible para oportunidades Front-End
@@ -47,8 +47,9 @@ export function Hero() {
 						>
 							Jhonatan
 							<br />
-							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent">Cardona Duarte</span>
-							
+							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent">
+								Cardona Duarte
+							</span>
 							<br />
 							Front-End Developer
 						</motion.h1>
@@ -88,7 +89,9 @@ export function Hero() {
 						<motion.div
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start">
+							transition={{ duration: 0.6, delay: 0.4 }}
+							className="flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
+						>
 							<span>📍 Pereira, Colombia</span>
 							<span>⚡ React & Next.js</span>
 							<span>🎓 Ingeniero Físico</span>
@@ -170,12 +173,13 @@ export function Hero() {
 							<div className="relative w-[88%] h-[88%] m-auto rounded-full overflow-hidden border border-border/50 glass z-10">
 								<div className="w-full h-full bg-linear-to-br from-secondary to-muted flex items-center justify-center">
 									<Image
-										src="https://static-cdn.jtvnw.net/jtv_user_pictures/53cb184a-135e-45cc-89ba-8b42b9c0f4b9-profile_image-300x300.jpeg"
+										src="/profile.webp"
 										alt="Jhonatan Cardona Duarte"
 										fill
 										priority
+										quality={100}
 										sizes="(max-width: 768px) 288px, 384px"
-										className="object-cover rounded-full object-center"
+										className="object-cover scale-105 object-[50%_0%] -translate-x-1"
 									/>
 									{/* <span className="text-6xl lg:text-7xl font-bold text-accent/50">AR</span> */}
 								</div>
