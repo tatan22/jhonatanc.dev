@@ -7,7 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { Github } from "lucide-react";
 import Image from "next/image";
 
-const projects = [
+const fallbackProjects = [
 	{
 		title: "Veloce",
 		description:
@@ -39,7 +39,11 @@ const projects = [
 		featured: false,
 	},
 ];
-export function Projects() {
+
+import { Project } from "@/lib/db";
+
+export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
+	const projectsData = initialProjects && initialProjects.length > 0 ? initialProjects : fallbackProjects;
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -65,7 +69,7 @@ export function Projects() {
 				</motion.div>
 
 				<div className="grid gap-10">
-					{projects.map((project, index) => (
+					{projectsData.map((project, index) => (
 						<motion.article
 							key={project.title}
 							initial={{ opacity: 0, y: 40 }}
@@ -81,7 +85,7 @@ export function Projects() {
 							>
 								<div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent z-10 lg:bg-linear-to-r lg:from-black/70 lg:via-black/30 lg:to-transparent" />
 								<Image
-									src={project.image}
+									src={(project as any).image || (project as any).image_url}
 									alt={project.title}
 									fill
 									sizes="(max-width: 768px) 100vw, 50vw"
@@ -102,7 +106,7 @@ export function Projects() {
 
 								{/* Tech stack */}
 								<div className="flex flex-wrap gap-2 mb-6">
-									{project.tech.map((tech) => (
+									{((project as any).tech || (project as any).tech_stack || []).map((tech: string) => (
 										<span
 											key={tech}
 											className="px-3 py-1.5 text-xs font-mono bg-secondary/50 border border-border rounded-lg text-muted-foreground"
@@ -115,14 +119,14 @@ export function Projects() {
 								{/* Links */}
 								<div className="flex items-center gap-4">
 									<a
-										href={project.liveUrl}
+										href={(project as any).liveUrl || (project as any).live_url || "#"}
 										className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300"
 									>
 										<ExternalLink className="w-4 h-4" />
 										Demo
 									</a>
 									<a
-										href={project.githubUrl}
+										href={(project as any).githubUrl || (project as any).github_url || "#"}
 										className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary/80 transition-all duration-300"
 									>
 										<Github className="w-4 h-4" />

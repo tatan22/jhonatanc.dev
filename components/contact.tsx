@@ -3,6 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Send, Github, Linkedin, Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function Contact() {
 	const ref = useRef(null);
@@ -13,9 +14,32 @@ export function Contact() {
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setIsSubmitting(true);
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		setIsSubmitting(false);
-		setIsSubmitted(true);
+		
+		const formData = new FormData(e.currentTarget);
+		const data = {
+			name: formData.get("name"),
+			email: formData.get("email"),
+			message: formData.get("message"),
+		};
+
+		try {
+			const res = await fetch("/api/contact", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+
+			if (!res.ok) throw new Error("Error al enviar el mensaje");
+			
+			setIsSubmitted(true);
+			toast.success("Mensaje enviado correctamente");
+		} catch (error) {
+			toast.error("Hubo un problema al enviar el mensaje. Intenta nuevamente.");
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (

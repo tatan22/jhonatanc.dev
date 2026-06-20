@@ -6,7 +6,9 @@ import Image from "next/image";
 
 const techBadges = ["React", "Next.js", "TypeScript", "Tailwind", "NestJS"];
 
-export function Hero() {
+import { Profile } from "@/lib/db";
+
+export function Hero({ profile }: { profile?: Profile | null }) {
 	return (
 		<section className="relative min-h-screen flex items-center justify-center overflow-hidden">
 			{/* Animated background */}
@@ -45,13 +47,13 @@ export function Hero() {
 							transition={{ duration: 0.6, delay: 0.1 }}
 							className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-8"
 						>
-							Jhonatan
+							{profile?.name ? profile.name.split(" ")[0] : "Jhonatan"}
 							<br />
 							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent">
-								Cardona Duarte
+								{profile?.name ? profile.name.split(" ").slice(1).join(" ") : "Cardona Duarte"}
 							</span>
 							<br />
-							Front-End Developer
+							{profile?.role || "Front-End Developer"}
 						</motion.h1>
 
 						<motion.p
@@ -60,9 +62,9 @@ export function Hero() {
 							transition={{ duration: 0.6, delay: 0.2 }}
 							className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
 						>
-							Ingeniero Físico y Desarrollador Front-End enfocado en crear
+							{profile?.bio || `Ingeniero Físico y Desarrollador Front-End enfocado en crear
 							interfaces modernas, experiencias intuitivas y aplicaciones web
-							con React, Next.js y TypeScript.
+							con React, Next.js y TypeScript.`}
 						</motion.p>
 
 						{/* Tech badges */}
@@ -92,7 +94,7 @@ export function Hero() {
 							transition={{ duration: 0.6, delay: 0.4 }}
 							className="flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
 						>
-							<span>📍 Pereira, Colombia</span>
+							<span>{profile?.location || "📍 Pereira, Colombia"}</span>
 							<span>⚡ React & Next.js</span>
 							<span>🎓 Ingeniero Físico</span>
 						</motion.div>
@@ -173,8 +175,8 @@ export function Hero() {
 							<div className="relative w-[88%] h-[88%] m-auto rounded-full overflow-hidden border border-border/50 glass z-10">
 								<div className="w-full h-full bg-linear-to-br from-secondary to-muted flex items-center justify-center">
 									<Image
-										src="/profile.webp"
-										alt="Jhonatan Cardona Duarte"
+										src={profile?.image_url || "/profile.webp"}
+										alt={profile?.name || "Jhonatan Cardona Duarte"}
 										fill
 										priority
 										quality={100}

@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import { getProfile, getProjects } from "@/lib/db";
 
 const Navigation = dynamic(
 	() => import("@/components/navigation").then((mod) => mod.Navigation),
@@ -45,12 +46,16 @@ const Footer = dynamic(
 	{ ssr: false }
 );
 
-export default function Home() {
+export default async function Home() {
+	// Intentamos obtener datos de la base de datos. Si falla, pasamos null/[] para usar los fallbacks.
+	const profile = await getProfile().catch(() => null);
+	const projects = await getProjects().catch(() => []);
+
 	return (
 		<main className="min-h-screen bg-background overflow-x-hidden">
 			<Navigation />
-			<Hero />
-			<Projects />
+			<Hero profile={profile} />
+			<Projects initialProjects={projects && projects.length > 0 ? projects : undefined} />
 			<Services />
 			<About />
 			<Workflow />
