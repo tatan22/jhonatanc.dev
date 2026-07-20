@@ -28,14 +28,14 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 			/>
 
 			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20">
-				<div className="flex flex-col lg:flex-row items-center gap-16">
+				<div className="flex flex-col-reverse lg:flex-row items-center gap-16">
 					{/* Content */}
-					<div className="flex-1 text-center lg:text-left">
+					<div className="flex-1 text-center lg:text-left mt-8 lg:mt-0 flex flex-col lg:block">
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6 }}
-							className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm text-foreground/80 shadow-lg shadow-accent/10 mb-8"
+							className="order-4 lg:order-none inline-flex items-center self-center lg:self-auto gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm text-foreground/80 shadow-lg shadow-accent/10 mb-8 mt-2 lg:mt-0"
 						>
 							<span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
 							Disponible para oportunidades Front-End
@@ -45,7 +45,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.1 }}
-							className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-8"
+							className="order-1 lg:order-none text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-8"
 						>
 							{profile?.name || "Jhonatan Cardona Duarte"}
 							<br />
@@ -58,7 +58,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.2 }}
-							className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
+							className="order-2 lg:order-none text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
 						>
 							{profile?.bio || `Ingeniero Físico y Desarrollador Front-End enfocado en crear
 							interfaces modernas, tiendas en línea (E-commerce) y aplicaciones web escalables
@@ -70,7 +70,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.3 }}
-							className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10"
+							className="order-3 lg:order-none flex flex-wrap justify-center lg:justify-start gap-3 mb-6 lg:mb-10"
 						>
 							{techBadges.map((tech, index) => (
 								<motion.span
@@ -90,7 +90,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.4 }}
-							className="flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
+							className="order-5 lg:order-none flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
 						>
 							<span>{profile?.location || "📍 Pereira, Colombia"}</span>
 							<span>⚡ React & Next.js</span>
@@ -102,7 +102,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.4 }}
-							className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
+							className="order-6 lg:order-none flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
 						>
 							<a
 								href="#projects"
@@ -124,7 +124,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.6, delay: 0.6 }}
-							className="flex items-center justify-center lg:justify-start gap-4 mt-12"
+							className="order-7 lg:order-none flex items-center justify-center lg:justify-start gap-4 mt-12"
 						>
 							{[
 								{
@@ -166,8 +166,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 					>
 						<div className="relative w-72 h-72 lg:w-96 lg:h-96">
 							{/* Glow effect */}
-							{/* Glow effect */}
-							<div className="absolute inset-0 rounded-full bg-accent/40 blur-3xl scale-150 animate-pulse z-0" />
+							<div className="absolute inset-0 rounded-full bg-accent/20 blur-2xl scale-110 lg:bg-accent/40 lg:blur-3xl lg:scale-150 animate-pulse z-0" />
 
 							{/* Image container */}
 							<div className="relative w-[88%] h-[88%] m-auto rounded-full overflow-hidden border border-border/50 glass z-10">
