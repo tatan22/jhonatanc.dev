@@ -12,7 +12,7 @@ export const contentType = 'image/png'
 export default async function Image() {
   const profile = await getProfile();
   
-  // Asegurarnos de que la URL de la imagen sea absoluta, ya que next/og lo requiere
+  // Satori requiere URLs absolutas
   const rawImageUrl = profile?.image_url || "/profile.webp";
   const imageUrl = rawImageUrl.startsWith('http') 
     ? rawImageUrl 
@@ -38,40 +38,36 @@ export default async function Image() {
           <img 
             src={imageUrl}
             alt="Profile"
-            width="300"
-            height="300"
+            width="320"
+            height="320"
             style={{ 
-              borderRadius: '150px', 
-              objectFit: 'cover',
-              objectPosition: 'top',
+              borderRadius: '160px',
               border: '8px solid #3b82f6',
-              boxShadow: '0 0 40px rgba(59, 130, 246, 0.4)'
             }}
           />
         </div>
 
-        {/* Right side: Text */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-            <span style={{ fontSize: '28px', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>
-              Portafolio Profesional
+        <div style={{ display: 'flex', flexDirection: 'column', width: '600px', alignItems: 'flex-start', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
+            <span style={{ fontSize: '32px', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>
+              Jhonatan Cardona
             </span>
           </div>
-          <h1 style={{ fontSize: '72px', fontWeight: 'bold', color: 'white', margin: '0', lineHeight: 1.1 }}>
-            Jhonatan Cardona
+          <h1 style={{ fontSize: '64px', fontWeight: 'bold', color: 'white', margin: '0', lineHeight: 1.1 }}>
+            Full-Stack TypeScript Engineer
           </h1>
-          <p style={{ fontSize: '36px', color: '#9ca3af', marginTop: '16px', marginBottom: '40px' }}>
-            Full-Stack TypeScript Engineer & Commerce Creator
+          <p style={{ fontSize: '32px', color: '#9ca3af', marginTop: '24px', marginBottom: '48px', lineHeight: 1.4 }}>
+            Especialista en tiendas en línea y aplicaciones web escalables
           </p>
           
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ display: 'flex', padding: '12px 24px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '24px', color: '#e5e7eb' }}>
+          <div style={{ display: 'flex', gap: '24px' }}>
+            <div style={{ display: 'flex', padding: '16px 32px', backgroundColor: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '28px', color: 'white' }}>
               Next.js
             </div>
-            <div style={{ display: 'flex', padding: '12px 24px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '24px', color: '#e5e7eb' }}>
+            <div style={{ display: 'flex', padding: '16px 32px', backgroundColor: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '28px', color: 'white' }}>
               NestJS
             </div>
-            <div style={{ display: 'flex', padding: '12px 24px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '24px', color: '#e5e7eb' }}>
+            <div style={{ display: 'flex', padding: '16px 32px', backgroundColor: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '28px', color: 'white' }}>
               React Native
             </div>
           </div>
