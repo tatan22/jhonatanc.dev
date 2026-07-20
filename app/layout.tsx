@@ -10,11 +10,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "Jhonatan Cardona | Frontend Developer & E-commerce Creator",
+	title: "Jhonatan Cardona | Full-Stack TypeScript Engineer & Commerce Creator",
 	description:
-		"Ingeniero físico y desarrollador Frontend especializado en React, Next.js, TypeScript y creación de tiendas en línea (E-commerce) en Pereira, Colombia.",
+		"Soy el aliado tecnológico ideal para digitalizar tu negocio. Especialista en crear tiendas en línea (E-commerce) rápidas y seguras para multiplicar tus ventas.",
 	keywords: [
+		"Full Stack Developer",
 		"Frontend Developer",
+		"Backend Developer",
 		"React Developer",
 		"Next.js",
 		"TypeScript",
@@ -29,23 +31,14 @@ export const metadata: Metadata = {
 		type: "website",
 		locale: "es_CO",
 		url: "https://jhonatanc-dev.vercel.app/",
-		title: "Jhonatan Cardona | Frontend Developer & E-commerce Creator",
-		description: "Especialista en React, Next.js y creación de tiendas en línea modernas.",
+		title: "Jhonatan Cardona | Full-Stack TypeScript Engineer & Commerce Creator",
+		description: "Soy el aliado tecnológico ideal para digitalizar tu negocio. Especialista en crear tiendas en línea rápidas y seguras.",
 		siteName: "Portafolio de Jhonatan Cardona",
-		images: [
-			{
-				url: "https://jhonatanc-dev.vercel.app/profile.webp",
-				width: 1200,
-				height: 630,
-				alt: "Jhonatan Cardona - Frontend Developer",
-			},
-		],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Jhonatan Cardona | Frontend Developer",
-		description: "Desarrollador Web especializado en React y E-commerce.",
-		images: ["https://jhonatanc-dev.vercel.app/profile.webp"],
+		title: "Jhonatan Cardona | Full-Stack TypeScript Engineer",
+		description: "Soy el aliado tecnológico ideal para digitalizar tu negocio y multiplicar tus ventas.",
 	},
 };
 

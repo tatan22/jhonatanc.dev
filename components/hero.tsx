@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 import Image from "next/image";
 
-const techBadges = ["React", "Next.js", "TypeScript", "Tailwind", "NestJS"];
+const techBadges = ["Next.js", "NestJS", "React Native", "TypeScript", "Tailwind"];
 
 import { Profile } from "@/lib/db";
 
@@ -60,9 +60,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							transition={{ duration: 0.6, delay: 0.2 }}
 							className="order-2 lg:order-none text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
 						>
-							{profile?.bio || `Ingeniero Físico y Desarrollador Front-End enfocado en crear
-							interfaces modernas, tiendas en línea (E-commerce) y aplicaciones web escalables
-							con React, Next.js y TypeScript.`}
+							{profile?.bio || `Soy el aliado tecnológico ideal para llevar tu negocio al mundo digital. Como Ingeniero Físico y Desarrollador Full Stack, diseño y construyo tiendas en línea rápidas, seguras y optimizadas para multiplicar tus ventas. Me encargo de toda la complejidad técnica para que tú te enfoques en hacer crecer tu empresa.`}
 						</motion.p>
 
 						{/* Tech badges */}
@@ -178,7 +176,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 										priority
 										quality={100}
 										sizes="(max-width: 768px) 288px, 384px"
-										className="object-cover scale-105 object-[50%_0%] -translate-x-1"
+										className="object-cover object-top"
 									/>
 									{/* <span className="text-6xl lg:text-7xl font-bold text-accent/50">AR</span> */}
 								</div>
