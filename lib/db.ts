@@ -58,6 +58,10 @@ export async function initDb() {
       );
     `;
 
+    // Preemptive fix: Alter columns to TEXT in case they were previously created as VARCHAR(255)
+    await sql`ALTER TABLE profiles ALTER COLUMN image_url TYPE TEXT`;
+    await sql`ALTER TABLE projects ALTER COLUMN image_url TYPE TEXT`;
+
     // Insert default profile if not exists
     const { rows } = await sql`SELECT COUNT(*) FROM profiles`;
     if (parseInt(rows[0].count) === 0) {

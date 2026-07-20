@@ -32,14 +32,18 @@ export async function PUT(request: Request) {
   try {
     if (type === 'profile') {
       const { name, role, bio, image_url, location } = data;
-      // We only have 1 profile (id = 1, or just update the first one)
-      await sql`
-        UPDATE profiles 
-        SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url}, location = ${location}
-        WHERE id = (SELECT id FROM profiles ORDER BY id LIMIT 1)
-      `;
-      revalidatePath('/');
-      return NextResponse.json({ success: true });
+      try {
+        await sql`
+          UPDATE profiles 
+          SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url}, location = ${location}
+          WHERE id = (SELECT id FROM profiles ORDER BY id LIMIT 1)
+        `;
+        revalidatePath('/');
+        return NextResponse.json({ success: true });
+      } catch (err: any) {
+        console.error(err);
+        return NextResponse.json({ error: err.message }, { status: 500 });
+      }
     } 
     else if (type === 'project') {
       const { id, title, description, image_url, tech_stack, live_url, github_url, featured, order_index } = data;

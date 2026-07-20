@@ -36,14 +36,18 @@ export default function AdminDashboard() {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      await fetch("/api/admin/data?type=profile", {
+      const res = await fetch("/api/admin/data?type=profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Error guardando");
+      }
       alert("Perfil guardado con éxito");
-    } catch (error) {
-      alert("Error guardando perfil");
+    } catch (error: any) {
+      alert("Error guardando perfil: " + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -52,15 +56,19 @@ export default function AdminDashboard() {
   const handleSaveProject = async (project: any) => {
     setIsSaving(true);
     try {
-      await fetch("/api/admin/data?type=project", {
+      const res = await fetch("/api/admin/data?type=project", {
         method: project.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(project),
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Error guardando");
+      }
       alert("Proyecto guardado");
       fetchData(); // Refresh to get the new ID if it was created
-    } catch (error) {
-      alert("Error guardando proyecto");
+    } catch (error: any) {
+      alert("Error guardando proyecto: " + error.message);
     } finally {
       setIsSaving(false);
     }

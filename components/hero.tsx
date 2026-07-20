@@ -45,15 +45,13 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.1 }}
-							className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-8"
+							className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-8"
 						>
-							{profile?.name ? profile.name.split(" ")[0] : "Jhonatan"}
+							{profile?.name || "Jhonatan Cardona Duarte"}
 							<br />
-							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent">
-								{profile?.name ? profile.name.split(" ").slice(1).join(" ") : "Cardona Duarte"}
+							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent mt-2 block">
+								{profile?.role || "Front-End Developer"}
 							</span>
-							<br />
-							{profile?.role || "Front-End Developer"}
 						</motion.h1>
 
 						<motion.p
