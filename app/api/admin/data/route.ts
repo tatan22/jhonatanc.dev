@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { getProfile, getProjects } from '@/lib/db';
 
 // Check if user is authenticated
@@ -37,6 +38,7 @@ export async function PUT(request: Request) {
         SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url}, location = ${location}
         WHERE id = (SELECT id FROM profiles ORDER BY id LIMIT 1)
       `;
+      revalidatePath('/');
       return NextResponse.json({ success: true });
     } 
     else if (type === 'project') {
@@ -48,6 +50,7 @@ export async function PUT(request: Request) {
             featured = ${featured}, order_index = ${order_index}
         WHERE id = ${id}
       `;
+      revalidatePath('/');
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
@@ -70,6 +73,7 @@ export async function POST(request: Request) {
         INSERT INTO projects (title, description, image_url, tech_stack, live_url, github_url, featured, order_index)
         VALUES (${title}, ${description}, ${image_url}, ${`{${tech_stack.join(',')}}`}, ${live_url}, ${github_url}, ${featured}, ${order_index})
       `;
+      revalidatePath('/');
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
@@ -88,6 +92,7 @@ export async function DELETE(request: Request) {
   try {
     if (type === 'project' && id) {
       await sql`DELETE FROM projects WHERE id = ${id}`;
+      revalidatePath('/');
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ error: 'Invalid type or missing id' }, { status: 400 });
