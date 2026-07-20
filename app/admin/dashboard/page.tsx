@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Save, Trash2, LogOut } from "lucide-react";
+import { UploadButton } from "@/lib/uploadthing";
 
 export default function AdminDashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -147,13 +148,27 @@ export default function AdminDashboard() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-2 text-muted-foreground">URL Imagen (ej: /profile.webp)</label>
-            <input 
-              type="text" 
-              value={profile?.image_url || ""} 
-              onChange={e => setProfile({...profile, image_url: e.target.value})}
-              className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none" 
-            />
+            <label className="block text-sm mb-2 text-muted-foreground">URL Imagen (Sube una foto o pega el enlace)</label>
+            <div className="flex gap-4 items-start">
+              <input 
+                type="text" 
+                value={profile?.image_url || ""} 
+                onChange={e => setProfile({...profile, image_url: e.target.value})}
+                className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none" 
+              />
+              <UploadButton
+                endpoint="imageUploader"
+                onClientUploadComplete={(res) => {
+                  if (res && res[0]) {
+                    setProfile({...profile, image_url: res[0].url});
+                    alert("Imagen subida correctamente");
+                  }
+                }}
+                onUploadError={(error: Error) => {
+                  alert(`ERROR: ${error.message}`);
+                }}
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm mb-2 text-muted-foreground">Ubicación</label>
@@ -198,17 +213,33 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm mb-2 text-muted-foreground">URL Imagen (ej: /projects/veloce.jpg)</label>
-                  <input 
-                    type="text" 
-                    value={project.image_url || ""} 
-                    onChange={e => {
-                      const newProjects = [...projects];
-                      newProjects[index].image_url = e.target.value;
-                      setProjects(newProjects);
-                    }}
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none" 
-                  />
+                  <label className="block text-sm mb-2 text-muted-foreground">URL Imagen (Sube una foto o pega el enlace)</label>
+                  <div className="flex gap-4 items-start">
+                    <input 
+                      type="text" 
+                      value={project.image_url || ""} 
+                      onChange={e => {
+                        const newProjects = [...projects];
+                        newProjects[index].image_url = e.target.value;
+                        setProjects(newProjects);
+                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none" 
+                    />
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res) => {
+                        if (res && res[0]) {
+                          const newProjects = [...projects];
+                          newProjects[index].image_url = res[0].url;
+                          setProjects(newProjects);
+                          alert("Imagen subida correctamente");
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        alert(`ERROR: ${error.message}`);
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm mb-2 text-muted-foreground">Descripción</label>

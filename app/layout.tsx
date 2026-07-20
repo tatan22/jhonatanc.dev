@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
+import "@uploadthing/react/styles.css";
 
 export const metadata: Metadata = {
 	title: "Jhonatan Cardona | Frontend Developer",
