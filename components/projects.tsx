@@ -85,7 +85,7 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 							>
 								<div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent z-10 lg:bg-linear-to-r lg:from-black/70 lg:via-black/30 lg:to-transparent" />
 								<Image
-									src={(project as any).image || (project as any).image_url}
+									src={(project as any).image || (project as any).image_url || "/projects/portfolio.jpg"}
 									alt={project.title}
 									fill
 									sizes="(max-width: 768px) 100vw, 50vw"
