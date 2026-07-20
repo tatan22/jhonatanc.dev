@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { getProfile } from '@/lib/db'
 
 export const runtime = 'edge'
 export const alt = 'Jhonatan Cardona | Full Stack Developer'
@@ -9,6 +10,14 @@ export const size = {
 export const contentType = 'image/png'
 
 export default async function Image() {
+  const profile = await getProfile();
+  
+  // Asegurarnos de que la URL de la imagen sea absoluta, ya que next/og lo requiere
+  const rawImageUrl = profile?.image_url || "/profile.webp";
+  const imageUrl = rawImageUrl.startsWith('http') 
+    ? rawImageUrl 
+    : `https://jhonatanc-dev.vercel.app${rawImageUrl}`;
+
   return new ImageResponse(
     (
       <div
@@ -27,7 +36,7 @@ export default async function Image() {
         <div style={{ display: 'flex', marginRight: '60px' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src="https://jhonatanc-dev.vercel.app/profile.webp"
+            src={imageUrl}
             alt="Profile"
             width="300"
             height="300"

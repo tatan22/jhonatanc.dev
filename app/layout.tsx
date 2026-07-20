@@ -12,7 +12,7 @@ import "./globals.css";
 export const metadata: Metadata = {
 	title: "Jhonatan Cardona | Full-Stack TypeScript Engineer & Commerce Creator",
 	description:
-		"Soy el aliado tecnológico ideal para digitalizar tu negocio. Especialista en crear tiendas en línea (E-commerce) rápidas y seguras para multiplicar tus ventas.",
+		"Especialista en crear tiendas online rápidas, escalables y optimizadas para SEO que ayudan a aumentar las ventas. Ingeniero Físico con experiencia en Next.js, NestJS y arquitecturas modernas para construir soluciones de alto rendimiento.",
 	keywords: [
 		"Full Stack Developer",
 		"Frontend Developer",
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
 		locale: "es_CO",
 		url: "https://jhonatanc-dev.vercel.app/",
 		title: "Jhonatan Cardona | Full-Stack TypeScript Engineer & Commerce Creator",
-		description: "Soy el aliado tecnológico ideal para digitalizar tu negocio. Especialista en crear tiendas en línea rápidas y seguras.",
+		description: "Especialista en crear tiendas online rápidas, escalables y optimizadas para SEO que ayudan a aumentar las ventas.",
 		siteName: "Portafolio de Jhonatan Cardona",
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Jhonatan Cardona | Full-Stack TypeScript Engineer",
-		description: "Soy el aliado tecnológico ideal para digitalizar tu negocio y multiplicar tus ventas.",
+		description: "Especialista en crear tiendas online rápidas y optimizadas para SEO que aumentan tus ventas.",
 	},
 };
 
