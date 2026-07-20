@@ -61,7 +61,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
 						>
 							{profile?.bio || `Ingeniero Físico y Desarrollador Front-End enfocado en crear
-							interfaces modernas, experiencias intuitivas y aplicaciones web
+							interfaces modernas, tiendas en línea (E-commerce) y aplicaciones web escalables
 							con React, Next.js y TypeScript.`}
 						</motion.p>
 
