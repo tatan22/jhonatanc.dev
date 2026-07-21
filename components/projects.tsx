@@ -80,8 +80,11 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 							}`}
 						>
 							{/* Image */}
-							<div
-								className={`relative overflow-hidden ${project.featured ? "lg:h-auto h-80" : "h-80"}`}
+							<a
+								href={(project as any).liveUrl || (project as any).live_url || "#"}
+								target="_blank"
+								rel="noopener noreferrer"
+								className={`relative overflow-hidden block cursor-pointer ${project.featured ? "lg:h-auto h-80" : "h-80"}`}
 							>
 								<div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent z-10 lg:bg-linear-to-r lg:from-black/70 lg:via-black/30 lg:to-transparent" />
 								<Image
@@ -97,15 +100,22 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 									sizes="(max-width: 768px) 100vw, 50vw"
 									className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
 								/>
-							</div>
+							</a>
 
 							{/* Content */}
 							<div
 								className={`relative z-20 p-8 lg:p-10 ${project.featured ? "flex flex-col justify-center" : ""}`}
 							>
-								<h3 className="text-2xl font-semibold mb-3 group-hover:text-accent group-hover:tracking-wide transition-all duration-300">
-									{project.title}
-								</h3>
+								<a 
+									href={(project as any).liveUrl || (project as any).live_url || "#"}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-block"
+								>
+									<h3 className="text-2xl font-semibold mb-3 group-hover:text-accent group-hover:tracking-wide transition-all duration-300">
+										{project.title}
+									</h3>
+								</a>
 								<p className="text-muted-foreground mb-6 leading-relaxed">
 									{project.description}
 								</p>
@@ -126,6 +136,8 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 								<div className="flex items-center gap-4">
 									<a
 										href={(project as any).liveUrl || (project as any).live_url || "#"}
+										target="_blank"
+										rel="noopener noreferrer"
 										className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300"
 									>
 										<ExternalLink className="w-4 h-4" />
@@ -133,6 +145,8 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 									</a>
 									<a
 										href={(project as any).githubUrl || (project as any).github_url || "#"}
+										target="_blank"
+										rel="noopener noreferrer"
 										className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary/80 transition-all duration-300"
 									>
 										<Github className="w-4 h-4" />
