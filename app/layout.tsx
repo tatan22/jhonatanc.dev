@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 import "./globals.css";
 import { getProfile } from "@/lib/db";
@@ -87,6 +88,7 @@ export default function RootLayout({
 				</ThemeProvider>
 
 				<Analytics />
+				<GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
 			</body>
 		</html>
 	);
