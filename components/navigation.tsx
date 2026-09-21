@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 const navItems = [
 	{ name: "Proyectos", href: "#projects" },
@@ -64,6 +65,7 @@ export function Navigation() {
 								<a
 									href={item.href}
 									className="text-sm font-medium text-muted-foreground hover:text-accent transition-all duration-300"
+									onClick={() => sendGTMEvent({ event: "nav_click", value: item.name })}
 								>
 									{item.name}
 								</a>
@@ -74,6 +76,7 @@ export function Navigation() {
 							<a
 								href="#contact"
 								className="text-sm px-5 py-2.5 bg-foreground text-background rounded-full hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+								onClick={() => sendGTMEvent({ event: "generate_lead", value: "contact_nav" })}
 							>
 								Hablemos
 							</a>
@@ -83,8 +86,11 @@ export function Navigation() {
 					<button
 						onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
 						className="md:hidden p-2"
+						aria-expanded={isMobileMenuOpen}
+						aria-controls="mobile-menu"
+						aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú principal"}
 					>
-						{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+						{isMobileMenuOpen ? <X aria-hidden="true" size={24} /> : <Menu aria-hidden="true" size={24} />}
 					</button>
 				</nav>
 			</motion.header>
@@ -106,7 +112,10 @@ export function Navigation() {
 								<a
 									key={item.name}
 									href={item.href}
-									onClick={() => setIsMobileMenuOpen(false)}
+									onClick={() => {
+										setIsMobileMenuOpen(false);
+										sendGTMEvent({ event: "nav_click_mobile", value: item.name });
+									}}
 									className="text-2xl font-medium"
 								>
 									{item.name}
@@ -115,7 +124,10 @@ export function Navigation() {
 
 							<a
 								href="#contact"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={() => {
+									setIsMobileMenuOpen(false);
+									sendGTMEvent({ event: "generate_lead", value: "contact_nav_mobile" });
+								}}
 								className="mt-4 px-8 py-3 bg-accent rounded-full text-lg font-medium"
 							>
 								Get in Touch

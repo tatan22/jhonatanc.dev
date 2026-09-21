@@ -43,11 +43,9 @@ export function About() {
 							</p>
 
 							<p>
-								<p>
-									He desarrollado proyectos personales enfocados en SaaS,
-									dashboards y landing pages, aplicando buenas prácticas de
-									UI/UX, rendimiento y arquitectura de componentes.
-								</p>
+								He desarrollado proyectos personales enfocados en SaaS,
+								dashboards y landing pages, aplicando buenas prácticas de
+								UI/UX, rendimiento y arquitectura de componentes.
 							</p>
 
 							<p>

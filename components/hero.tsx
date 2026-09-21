@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 import Image from "next/image";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 const techBadges = ["Next.js", "NestJS", "React Native", "TypeScript", "Tailwind"];
 
@@ -104,6 +105,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 						>
 							<a
 								href="#projects"
+								onClick={() => sendGTMEvent({ event: "generate_lead", value: "projects_hero" })}
 								className="group px-8 py-4 bg-foreground text-background rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
 							>
 								Ver Proyectos
@@ -111,6 +113,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							</a>
 							<a
 								href="#contact"
+								onClick={() => sendGTMEvent({ event: "generate_lead", value: "contact_hero" })}
 								className="px-8 py-4 border border-border rounded-full font-medium text-foreground hover:bg-secondary transition-all duration-300"
 							>
 								Contáctame
@@ -162,12 +165,12 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 						transition={{ duration: 0.8, delay: 0.3 }}
 						className="relative"
 					>
-						<div className="relative w-72 h-72 lg:w-96 lg:h-96">
+						<div className="relative w-72 h-72 lg:w-96 lg:h-96 aspect-square">
 							{/* Glow effect */}
 							<div className="absolute inset-0 rounded-full bg-accent/20 blur-2xl scale-110 lg:bg-accent/40 lg:blur-3xl lg:scale-150 animate-pulse z-0" />
 
 							{/* Image container */}
-							<div className="relative w-[88%] h-[88%] m-auto rounded-full overflow-hidden border border-border/50 glass z-10">
+							<div className="relative w-[88%] h-[88%] m-auto rounded-full overflow-hidden border border-border/50 glass z-10 aspect-square">
 								<div className="w-full h-full bg-linear-to-br from-secondary to-muted flex items-center justify-center">
 									<Image
 										src={profile?.image_url || "/profile.webp"}

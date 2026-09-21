@@ -10,6 +10,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 
 import "./globals.css";
 import { getProfile } from "@/lib/db";
+import { FloatingCTA } from "@/components/floating-cta";
+import { ExitIntentPopup } from "@/components/exit-intent-popup";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const profile = await getProfile();
@@ -17,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 	const absoluteImageUrl = imageUrl.startsWith('http') ? imageUrl : `https://jhonatanc-dev.vercel.app${imageUrl}`;
 
 	return {
+		metadataBase: new URL("https://jhonatanc-dev.vercel.app"),
 		title: "Jhonatan Cardona | Full-Stack TypeScript Engineer & Commerce Creator",
 		description:
 			"Especialista en crear tiendas online rápidas, escalables y optimizadas para SEO que ayudan a aumentar las ventas. Ingeniero Físico con experiencia en Next.js, NestJS y arquitecturas modernas para construir soluciones de alto rendimiento.",
@@ -89,6 +92,22 @@ export default function RootLayout({
 
 				<Analytics />
 				<GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							"@context": "https://schema.org",
+							"@type": "ProfessionalService",
+							name: "Jhonatan Cardona.Dev",
+							image: "https://jhonatanc-dev.vercel.app/profile.webp",
+							description:
+								"Especialista en crear tiendas online rápidas y optimizadas para SEO que aumentan tus ventas.",
+							url: "https://jhonatanc-dev.vercel.app",
+						}),
+					}}
+				/>
+				<FloatingCTA />
+				<ExitIntentPopup />
 			</body>
 		</html>
 	);

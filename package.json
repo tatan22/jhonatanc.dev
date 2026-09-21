@@ -4,9 +4,17 @@
 	"private": true,
 	"scripts": {
 		"build": "next build",
-		"dev": "next dev --hostname 0.0.0.0 --port 3000",
+		"dev": "next dev --hostname 0.0.0.0 --port 3001",
 		"lint": "eslint .",
-		"start": "next start"
+		"start": "next start",
+		"prepare": "husky",
+		"test": "vitest",
+		"analyze": "ANALYZE=true next build"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx}": [
+			"eslint --fix"
+		]
 	},
 	"dependencies": {
 		"@emotion/is-prop-valid": "latest",
@@ -70,13 +78,22 @@
 		"zod": "3.25.67"
 	},
 	"devDependencies": {
+		"@next/bundle-analyzer": "^16.3.5",
 		"@tailwindcss/postcss": "^4.1.9",
+		"@testing-library/dom": "^10.4.2",
+		"@testing-library/jest-dom": "^7.0.1",
+		"@testing-library/react": "^16.3.3",
 		"@types/node": "^22",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
+		"@vitejs/plugin-react": "^6.1.1",
+		"husky": "^9.1.7",
+		"jsdom": "^30.1.0",
+		"lint-staged": "^17.5.1",
 		"postcss": "^8.5",
 		"tailwindcss": "^4.1.9",
 		"tw-animate-css": "1.3.3",
-		"typescript": "^5"
+		"typescript": "^5",
+		"vitest": "^5.0.1"
 	}
 }
