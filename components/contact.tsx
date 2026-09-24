@@ -1,33 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { Reveal } from "@/components/reveal";
-import { Send, Github, Linkedin, Mail, Loader2 } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { Mail, Github, Linkedin, Send } from "lucide-react";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 export function Contact() {
+	const ref = useRef(null);
+	const isInView = useInView(ref, { once: true, margin: "-100px" });
+
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [formData, setFormData] = useState({
+		name: "",
+		email: "",
+		subject: "",
+		message: "",
+		website: "",
+	});
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+	) => {
+		setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSubmitting(true);
-
-		const formData = new FormData(e.currentTarget);
-		const data = {
-			name: formData.get("name"),
-			email: formData.get("email"),
-			message: formData.get("message"),
-			website: formData.get("website") ?? "",
-		};
 
 		try {
 			const res = await fetch("/api/contact", {
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(data),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(formData),
 			});
 
 			if (res.status === 429) {
@@ -58,18 +65,25 @@ export function Contact() {
 	};
 
 	return (
-		<section id="contact" className="py-24 md:py-32 relative">
+		<section id="contact" className="py-32 relative" ref={ref}>
 			<div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/2 to-transparent" />
 
 			<div className="relative max-w-6xl mx-auto px-6">
-				<Reveal className="text-center mb-10 md:mb-16">
-					<span className="text-accent text-sm font-medium tracking-wider uppercase">
+				<motion.div
+					initial={{ opacity: 0, y: 30 }}
+					animate={isInView ? { opacity: 1, y: 0 } : {}}
+					transition={{ duration: 0.6 }}
+					className="text-center mb-16"
+				>
+					<span className="text-accent font-mono text-sm tracking-wider uppercase">
 						Contacto
 					</span>
 
 					<h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mt-4 mb-6 leading-tight">
 						Trabajemos en algo
-						<span className="block text-accent">increíble juntos</span>
+						<span className="block bg-linear-to-r from-accent to-blue-400 bg-clip-text text-transparent">
+							increíble juntos
+						</span>
 					</h2>
 
 					<p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
@@ -77,11 +91,20 @@ export function Contact() {
 						en interfaces modernas, dashboards, landing pages y aplicaciones
 						web.
 					</p>
-				</Reveal>
+				</motion.div>
 
-				<div className="grid lg:grid-cols-2 gap-10 md:gap-16">
+				<motion.div
+					initial={{ opacity: 0, y: 30 }}
+					animate={isInView ? { opacity: 1, y: 0 } : {}}
+					transition={{ duration: 0.6, delay: 0.1 }}
+					className="grid lg:grid-cols-2 gap-16"
+				>
 					{/* Contact form */}
-					<Reveal delay={0.2} y={30}>
+					<motion.div
+						initial={{ opacity: 0, x: -30 }}
+						animate={isInView ? { opacity: 1, x: 0 } : {}}
+						transition={{ duration: 0.6 }}
+					>
 						{isSubmitted ? (
 							<div className="h-full flex items-center justify-center">
 								<div className="text-center">
@@ -91,7 +114,6 @@ export function Contact() {
 									<h3 className="text-2xl font-bold mb-2">
 										¡Mensaje enviado!
 									</h3>
-
 									<p className="text-muted-foreground">
 										Gracias por contactarme. Te responderé lo antes
 										posible.
@@ -116,9 +138,10 @@ export function Contact() {
 										name="name"
 										required
 										className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-										placeholder="Tu Nombre"
+										placeholder="Tu nombre"
 									/>
 								</div>
+
 								<div>
 									<label
 										htmlFor="email"
@@ -132,9 +155,27 @@ export function Contact() {
 										name="email"
 										required
 										className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-										placeholder="Tu Email"
+										placeholder="tu@email.com"
 									/>
 								</div>
+
+								<div>
+									<label
+										htmlFor="subject"
+										className="block text-sm font-medium mb-2"
+									>
+										Asunto
+									</label>
+									<input
+										type="text"
+										id="subject"
+										name="subject"
+										required
+										className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
+										placeholder="Sobre qué quieres hablar"
+									/>
+								</div>
+
 								<div>
 									<label
 										htmlFor="message"
@@ -145,51 +186,59 @@ export function Contact() {
 									<textarea
 										id="message"
 										name="message"
-										required
 										rows={5}
+										required
 										className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all resize-none"
-										placeholder="Cuéntame sobre tu proyecto..."
+										placeholder="Cuéntame tu idea..."
 									/>
 								</div>
-								{/* Honeypot anti-spam: invisible para humanos */}
-								<div
-									className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+
+								{/* Honeypot */}
+								<input
+									type="text"
+									name="website"
+									id="website"
+									tabIndex={-1}
+									autoComplete="off"
+									style={{ display: "none" }}
 									aria-hidden="true"
-								>
-									<label htmlFor="website">
-										No llenar este campo
-									</label>
-									<input
-										type="text"
-										id="website"
-										name="website"
-										tabIndex={-1}
-										autoComplete="off"
-									/>
-								</div>
+								/>
+
 								<button
 									type="submit"
 									disabled={isSubmitting}
-									className="w-full py-4 px-8 bg-foreground text-background rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+									className="w-full py-4 px-8 bg-foreground text-background rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{isSubmitting ? (
 										<>
-											<Loader2 className="w-5 h-5 animate-spin" />
+											<motion.div
+												className="w-5 h-5 border-2 border-current border-t-transparent rounded-full"
+												animate={{ rotate: 360 }}
+												transition={{
+													duration: 1,
+													repeat: Infinity,
+													ease: "linear",
+												}}
+											/>
 											Enviando...
 										</>
 									) : (
 										<>
-											<Send className="w-5 h-5" />
 											Enviar mensaje
+											<Send className="w-4 h-4" aria-hidden />
 										</>
 									)}
 								</button>
 							</form>
 						)}
-					</Reveal>
+					</motion.div>
 
 					{/* Contact info */}
-					<Reveal delay={0.3} y={30} className="space-y-8">
+					<motion.div
+						initial={{ opacity: 0, x: 30 }}
+						animate={isInView ? { opacity: 1, x: 0 } : {}}
+						transition={{ duration: 0.6, delay: 0.2 }}
+					>
 						<div>
 							<h3 className="text-xl font-semibold mb-4">
 								Conecta conmigo
@@ -201,7 +250,12 @@ export function Contact() {
 							</p>
 						</div>
 
-						<div className="space-y-4">
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={isInView ? { opacity: 1, y: 0 } : {}}
+							transition={{ delay: 0.3, staggerChildren: 0.1 }}
+							className="space-y-4"
+						>
 							{[
 								{
 									icon: Mail,
@@ -222,29 +276,30 @@ export function Contact() {
 									href: "https://www.linkedin.com/in/jhonatan-cardona-duarte-bb525199/",
 								},
 							].map((item) => (
-								<a
+								<motion.a
 									key={item.label}
 									href={item.href}
 									target="_blank"
 									rel="noopener noreferrer"
+									whileHover={{ scale: 1.02 }}
 									className="flex items-center gap-4 p-4 rounded-2xl border border-border/40 bg-background/40 hover:border-accent/50 hover:bg-accent/5 hover:-translate-y-1 transition-all duration-300 group"
 								>
 									<div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
 										<item.icon className="w-5 h-5 text-accent" />
 									</div>
 									<div>
-										<div className="text-sm text-muted-foreground">
+										<p className="text-xs font-medium text-muted-foreground">
 											{item.label}
-										</div>
-										<div className="font-medium group-hover:text-accent transition-colors">
+										</p>
+										<p className="text-sm font-medium text-foreground">
 											{item.value}
-										</div>
+										</p>
 									</div>
-								</a>
+								</motion.a>
 							))}
-						</div>
-					</Reveal>
-				</div>
+						</motion.div>
+					</motion.div>
+				</motion.div>
 			</div>
 		</section>
 	);
