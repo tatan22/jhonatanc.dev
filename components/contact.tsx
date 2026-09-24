@@ -73,7 +73,7 @@ export function Contact() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ duration: 0.9 }}
-					className="text-center mb-16"
+					className="text-center mb-10"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
 						Contacto
@@ -97,7 +97,7 @@ export function Contact() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ duration: 0.9, delay: 0.15 }}
-					className="grid lg:grid-cols-2 gap-16"
+					className="grid lg:grid-cols-2 gap-10"
 				>
 					{/* Contact form */}
 					<motion.div

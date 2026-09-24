@@ -148,9 +148,9 @@ export function Navigation() {
 									value: "contact_nav_mobile",
 								});
 							}}
-							className="mt-4 px-8 py-3 bg-accent rounded-full text-lg font-medium"
+							className="mt-4 px-8 py-3 bg-accent text-accent-foreground rounded-full text-lg font-medium"
 						>
-							Get in Touch
+							Hablemos
 						</a>
 					</nav>
 				</div>

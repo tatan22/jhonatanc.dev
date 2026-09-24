@@ -17,7 +17,7 @@ export function About() {
 	return (
 		<section id="about" className="py-32 relative" ref={ref}>
 			<div className="max-w-6xl mx-auto px-6">
-				<div className="grid lg:grid-cols-2 gap-16 items-center">
+				<div className="grid lg:grid-cols-2 gap-10 items-center">
 					{/* Content */}
 					<motion.div
 						initial={{ opacity: 0, x: -30 }}

@@ -50,7 +50,7 @@ export function Workflow() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ duration: 0.9 }}
-					className="text-center mb-16"
+					className="text-center mb-10"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
 						Flujo de trabajo

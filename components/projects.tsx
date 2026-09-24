@@ -96,7 +96,7 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ duration: 0.9, delay: 0.15 }}
-					className="grid gap-10"
+					className="grid gap-8"
 				>
 					{projectsData.map((project, index) => {
 						const liveUrl = project.liveUrl || project.live_url || "#";

@@ -28,20 +28,10 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 				}}
 			/>
 
-			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20">
-				<div className="flex flex-col-reverse lg:flex-row items-center gap-16">
+			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 md:pt-28 pb-12 md:pb-16">
+				<div className="flex flex-col-reverse lg:flex-row items-center gap-10">
 					{/* Content */}
 					<div className="flex-1 text-center lg:text-left mt-8 lg:mt-0 flex flex-col lg:block">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6 }}
-							className="order-4 lg:order-none inline-flex items-center self-center lg:self-auto gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm text-foreground/80 shadow-lg shadow-accent/10 mb-8 mt-2 lg:mt-0"
-						>
-							<span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-							Disponible para oportunidades Front-End
-						</motion.div>
-
 						<motion.h1
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
@@ -90,7 +80,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.4 }}
-							className="order-5 lg:order-none flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
+							className="order-4 lg:order-none flex flex-wrap items-center gap-3 md:gap-6 text-sm text-muted-foreground mb-10 justify-center lg:justify-start"
 						>
 							<span>{profile?.location || "📍 Pereira, Colombia"}</span>
 							<span>⚡ React & Next.js</span>
@@ -102,7 +92,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.4 }}
-							className="order-6 lg:order-none flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
+							className="order-5 lg:order-none flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
 						>
 							<a
 								href="#projects"
@@ -136,7 +126,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.6, delay: 0.6 }}
-							className="order-7 lg:order-none flex items-center justify-center lg:justify-start gap-4 mt-12"
+							className="order-6 lg:order-none flex items-center justify-center lg:justify-start gap-4 mt-12"
 						>
 							{[
 								{
@@ -204,7 +194,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 									repeat: Infinity,
 									ease: "easeInOut",
 								}}
-								className="absolute -top-4 -right-4 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10"
+								className="absolute -top-8 -right-8 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10"
 							>
 								React • Next.js
 							</motion.div>
