@@ -6,6 +6,7 @@ import { getPosts } from "@/lib/db";
 import { absoluteUrl, SITE_URL, AUTHOR_NAME } from "@/lib/site";
 
 export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
 	title: "Blog de E-commerce y Desarrollo Web",

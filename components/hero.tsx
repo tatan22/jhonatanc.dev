@@ -3,20 +3,11 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 import Image from "next/image";
-import { Profile } from "@/lib/db";
 import { sendGTMEvent } from "@next/third-parties/google";
 
 const techBadges = ["Next.js", "NestJS", "React Native", "TypeScript", "Tailwind"];
 
-const socialLinks = [
-	{ icon: Github, href: "https://github.com/tatan22", label: "GitHub" },
-	{
-		icon: Linkedin,
-		href: "https://linkedin.com/in/jhonatan-cardona-duarte-bb525199",
-		label: "LinkedIn",
-	},
-	{ icon: Mail, href: "mailto:tatancarduar@hotmail.com", label: "Email" },
-];
+import { Profile } from "@/lib/db";
 
 export function Hero({ profile }: { profile?: Profile | null }) {
 	return (
@@ -35,7 +26,6 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 					backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
 					backgroundSize: "60px 60px",
 				}}
-				aria-hidden
 			/>
 
 			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20">
@@ -111,7 +101,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 						<motion.div
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.5 }}
+							transition={{ duration: 0.6, delay: 0.4 }}
 							className="order-6 lg:order-none flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
 						>
 							<a
@@ -125,10 +115,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 								className="group px-8 py-4 bg-foreground text-background rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
 							>
 								Ver Proyectos
-								<ArrowDown
-									className="w-4 h-4 group-hover:translate-y-1 transition-transform"
-									aria-hidden
-								/>
+								<ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
 							</a>
 							<a
 								href="#contact"
@@ -145,12 +132,29 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 						</motion.div>
 
 						{/* Social links */}
-						<nav
-							aria-label="Redes sociales del hero"
-							className="animate-fade order-7 lg:order-none flex items-center justify-center lg:justify-start gap-4 mt-12"
-							style={{ animationDelay: "600ms" }}
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.6, delay: 0.6 }}
+							className="order-7 lg:order-none flex items-center justify-center lg:justify-start gap-4 mt-12"
 						>
-							{socialLinks.map(({ icon: Icon, href, label }) => (
+							{[
+								{
+									icon: Github,
+									href: "https://github.com/tatan22",
+									label: "GitHub",
+								},
+								{
+									icon: Linkedin,
+									href: "https://linkedin.com/in/jhonatan-cardona-duarte-bb525199",
+									label: "LinkedIn",
+								},
+								{
+									icon: Mail,
+									href: "mailto:tatancarduar@hotmail.com",
+									label: "Email",
+								},
+							].map(({ icon: Icon, href, label }) => (
 								<a
 									key={label}
 									href={href}
@@ -159,14 +163,19 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 									className="p-3 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-accent hover:bg-accent/10 transition-all duration-300"
 									aria-label={label}
 								>
-									<Icon className="w-5 h-5" aria-hidden />
+									<Icon className="w-5 h-5" />
 								</a>
 							))}
-						</nav>
+						</motion.div>
 					</div>
 
-					{/* Profile image */}
-					<div className="animate-scale relative">
+					{/* Profile image placeholder */}
+					<motion.div
+						initial={{ opacity: 0, scale: 0.9 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ duration: 0.8, delay: 0.3 }}
+						className="relative"
+					>
 						<div className="relative w-72 h-72 lg:w-96 lg:h-96 aspect-square">
 							{/* Glow effect */}
 							<div className="absolute inset-0 rounded-full bg-accent/20 blur-2xl scale-110 lg:bg-accent/40 lg:blur-3xl lg:scale-150 animate-pulse z-0" />
@@ -179,34 +188,57 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 										alt={profile?.name || "Jhonatan Cardona Duarte"}
 										fill
 										priority
-										quality={90}
+										quality={100}
 										sizes="(max-width: 768px) 288px, 384px"
 										className="object-cover object-top"
 									/>
+									{/* <span className="text-6xl lg:text-7xl font-bold text-accent/50">AR</span> */}
 								</div>
 							</div>
 
 							{/* Floating badges */}
-							<div className="animate-float absolute -top-4 -right-4 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10">
+							<motion.div
+								animate={{ y: [0, -10, 0] }}
+								transition={{
+									duration: 3,
+									repeat: Infinity,
+									ease: "easeInOut",
+								}}
+								className="absolute -top-4 -right-4 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10"
+							>
 								React • Next.js
-							</div>
-							<div className="animate-float-slow absolute -bottom-4 -left-4 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10">
+							</motion.div>
+							<motion.div
+								animate={{ y: [0, 10, 0] }}
+								transition={{
+									duration: 3.5,
+									repeat: Infinity,
+									ease: "easeInOut",
+								}}
+								className="absolute -bottom-4 -left-4 px-4 py-2 rounded-2xl border border-accent/20 bg-accent/10 backdrop-blur-xl text-sm font-medium text-foreground shadow-lg shadow-accent/10"
+							>
 								Physics + Software
-							</div>
+							</motion.div>
 						</div>
-					</div>
+					</motion.div>
 				</div>
 			</div>
 
 			{/* Scroll indicator */}
-			<div
-				className="animate-fade absolute bottom-8 left-1/2 -translate-x-1/2"
-				style={{ animationDelay: "1s" }}
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ delay: 1 }}
+				className="absolute bottom-8 left-1/2 -translate-x-1/2"
 			>
-				<div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center pt-2">
-					<div className="animate-scroll-dot w-1.5 h-1.5 bg-accent rounded-full" />
-				</div>
-			</div>
+				<motion.div
+					animate={{ y: [0, 8, 0] }}
+					transition={{ duration: 1.5, repeat: Infinity }}
+					className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center pt-2"
+				>
+					<motion.div className="w-1.5 h-1.5 bg-accent rounded-full" />
+				</motion.div>
+			</motion.div>
 		</section>
 	);
 }

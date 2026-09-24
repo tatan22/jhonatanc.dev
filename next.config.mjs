@@ -1,30 +1,51 @@
-import sentryPkg from "@sentry/nextjs";
-
-const { withSentryConfig } = sentryPkg;
-
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === "production";
+
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://vercel.live;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: blob: https: https://utfs.io https://cdn.utfs.io https://ufs.sh https://lh3.googleusercontent.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://vercel.live wss://vercel.live https://utfs.io https://cdn.utfs.io https://ufs.sh;
+  frame-src https://vercel.live;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  upgrade-insecure-requests;
+`
+	.replace(/\s{2,}/g, " ")
+	.trim();
+
 const nextConfig = {
-	experimental: {
-		instrumentationHook: true,
-	},
+	compress: true,
 	poweredByHeader: false,
+	reactStrictMode: true,
+	experimental: {
+		optimizePackageImports: [
+			"lucide-react",
+			"@radix-ui/react-icons",
+			"framer-motion",
+		],
+	},
 	images: {
-		// Solo hosts que el admin puede configurar (UploadThing) + dominio propio.
-		// Antes: hostname "**" (cualquier URL externa → abuso de la quota de Vercel).
+		formats: ["image/avif", "image/webp"],
 		remotePatterns: [
 			{ protocol: "https", hostname: "utfs.io" },
 			{ protocol: "https", hostname: "cdn.utfs.io" },
 			{ protocol: "https", hostname: "ufs.sh" },
-			{ protocol: "https", hostname: "jhonatanc-dev.vercel.app" },
 			{ protocol: "https", hostname: "lh3.googleusercontent.com" },
+			{ protocol: "https", hostname: "images.unsplash.com" },
+			{ protocol: "https", hostname: "picsum.photos" },
 		],
-		formats: ["image/avif", "image/webp"],
 	},
 	async headers() {
 		return [
 			{
 				source: "/:path*",
 				headers: [
+					{ key: "Content-Security-Policy", value: cspHeader },
 					{ key: "X-Content-Type-Options", value: "nosniff" },
 					{ key: "X-Frame-Options", value: "DENY" },
 					{
@@ -39,6 +60,7 @@ const nextConfig = {
 						key: "Strict-Transport-Security",
 						value: "max-age=63072000; includeSubDomains; preload",
 					},
+					{ key: "X-DNS-Prefetch-Control", value: "on" },
 				],
 			},
 			{
@@ -56,15 +78,4 @@ const nextConfig = {
 	},
 };
 
-// withSentryConfig sube source maps solo si SENTRY_AUTH_TOKEN está configurado;
-// sin token, se omite silenciosamente.
-const sentryWrapOptions = {
-	org: process.env.SENTRY_ORG,
-	project: process.env.SENTRY_PROJECT,
-	silent: !process.env.CI,
-	widenClientFileUpload: true,
-};
-
-export default process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN
-	? withSentryConfig(nextConfig, sentryWrapOptions)
-	: nextConfig;
+export default nextConfig;

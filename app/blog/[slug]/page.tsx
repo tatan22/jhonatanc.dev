@@ -7,6 +7,7 @@ import { getPostBySlug, getPosts } from "@/lib/db";
 import { absoluteUrl, SITE_URL, AUTHOR_NAME, SITE_NAME } from "@/lib/site";
 
 export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 type Props = { params: { slug: string } };
 
@@ -16,11 +17,6 @@ function formatDate(iso: string): string {
 		month: "long",
 		day: "numeric",
 	});
-}
-
-export async function generateStaticParams() {
-	const posts = await getPosts();
-	return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -11,16 +11,94 @@ async function isAuthenticated() {
 	return await verifySessionToken(session?.value);
 }
 
+// Datos de fallback para desarrollo local sin DB
+const FALLBACK_PROFILE = {
+	id: 1,
+	name: "Jhonatan Cardona Duarte",
+	role: "Full-Stack TypeScript Engineer",
+	bio: "Ingeniero Físico y Desarrollador Full-Stack especializado en crear aplicaciones web completas, escalables y productos de alta gama con React, Next.js, Node.js, Drizzle ORM y TypeScript.",
+	image_url: "/profile.webp",
+	resume_url: null,
+	github_url: null,
+	linkedin_url: null,
+	email: null,
+	location: "📍 Pereira, Colombia",
+};
+
+const FALLBACK_PROJECTS = [
+	{
+		id: 1,
+		title: "Meetly",
+		description:
+			"Plataforma SaaS full-stack premium para la creación, gestión y programación de comunidades y eventos en tiempo real, impulsada por Inteligencia Artificial y bases de datos serverless.",
+		image_url: "https://utfs.io/f/cvaZwA2TqdhLtj9Z3KVK3PVOlZroyxs6RDma9zhd7L0AjftY",
+		tech_stack: [
+			"Next.js",
+			"TypeScript",
+			"Drizzle ORM",
+			"Neon DB",
+			"Better Auth",
+			"Tailwind CSS",
+			"AI SDK",
+		],
+		live_url: "https://meetly-sandy-delta.vercel.app/",
+		github_url: "https://github.com/tatan22",
+		featured: true,
+		order_index: 1,
+	},
+	{
+		id: 2,
+		title: "Carvin Shop - E-commerce",
+		description:
+			"Tienda online demo full-stack con catálogo de ropa, carrito de compras, PayPal, panel admin, autenticación, SEO completo y búsqueda.",
+		image_url: "https://utfs.io/f/cvaZwA2TqdhLu8XKEW3aKAN39RD8uWTkqjdxIsOn4GLmSCE2",
+		tech_stack: [
+			"Next.js",
+			"TypeScript",
+			"PostgreSQL",
+			"Tailwind CSS",
+			"Better Auth",
+			"PayPal",
+		],
+		live_url: "https://carvin-shop-portafolio.vercel.app",
+		github_url: "https://github.com/tatan22",
+		featured: true,
+		order_index: 2,
+	},
+	{
+		id: 3,
+		title: "Portfolio Personal",
+		description:
+			"Portafolio moderno desarrollado con Next.js y Framer Motion enfocado en diseño premium y animaciones suaves.",
+		image_url: "/projects/portfolio.jpg",
+		tech_stack: ["Next.js", "Tailwind", "Framer Motion"],
+		live_url: null,
+		github_url: "https://github.com/tatan22",
+		featured: false,
+		order_index: 3,
+	},
+];
+
 export async function GET() {
 	if (!(await isAuthenticated()))
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
 	try {
-		const profile = await getProfile();
-		const projects = await getProjects();
-		return NextResponse.json({ profile, projects });
+		const [profile, projects] = await Promise.all([
+			getProfile().catch(() => null),
+			getProjects().catch(() => []),
+		]);
+
+		// Si falla la DB, usar fallbacks
+		return NextResponse.json({
+			profile: profile || FALLBACK_PROFILE,
+			projects: projects.length > 0 ? projects : FALLBACK_PROJECTS,
+		});
 	} catch {
-		return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+		return NextResponse.json({
+			profile: FALLBACK_PROFILE,
+			projects: FALLBACK_PROJECTS,
+		});
 	}
 }
 

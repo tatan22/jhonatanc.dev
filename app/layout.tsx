@@ -2,17 +2,19 @@ import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 import { getProfile } from "@/lib/db";
 import { FloatingCTA } from "@/components/floating-cta";
 import { ExitIntentPopup } from "@/components/exit-intent-popup";
 import { AnalyticsDelegate } from "@/components/analytics";
+import { ConsentAwareScripts } from "@/components/cpv/ConsentAwareScripts";
+import { CpvCookieConsent } from "@/components/cpv/CpvCookieConsent";
 
 const SITE_URL = "https://jhonatanc-dev.vercel.app";
 
@@ -111,8 +113,12 @@ export default function RootLayout({
 					<Suspense fallback={null}>{children}</Suspense>
 				</ThemeProvider>
 
-				<Analytics />
-				<GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+				{/* Analytics solo con consentimiento */}
+				<ConsentAwareScripts>
+					<GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+					<Analytics />
+				</ConsentAwareScripts>
+
 				<script
 					type="application/ld+json"
 					dangerouslySetInnerHTML={{
@@ -174,6 +180,7 @@ export default function RootLayout({
 				<FloatingCTA />
 				<ExitIntentPopup />
 				<AnalyticsDelegate />
+				<CpvCookieConsent />
 			</body>
 		</html>
 	);

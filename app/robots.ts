@@ -1,12 +1,15 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next";
+
+const SITE_URL = "https://jhonatanc-dev.vercel.app";
 
 export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin/'], // No queremos que los reclutadores ni google entren al CMS
-    },
-    sitemap: 'https://jhonatanc-dev.vercel.app/sitemap.xml',
-  }
+	return {
+		rules: {
+			userAgent: "*",
+			allow: "/",
+			disallow: ["/admin/", "/api/", "/private/"],
+		},
+		sitemap: `${SITE_URL}/sitemap.xml`,
+		host: SITE_URL,
+	};
 }

@@ -72,7 +72,7 @@ export function Contact() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
+					transition={{ duration: 0.9 }}
 					className="text-center mb-16"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
@@ -96,14 +96,14 @@ export function Contact() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6, delay: 0.1 }}
+					transition={{ duration: 0.9, delay: 0.15 }}
 					className="grid lg:grid-cols-2 gap-16"
 				>
 					{/* Contact form */}
 					<motion.div
 						initial={{ opacity: 0, x: -30 }}
 						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6 }}
+						transition={{ duration: 0.9 }}
 					>
 						{isSubmitted ? (
 							<div className="h-full flex items-center justify-center">
@@ -237,7 +237,7 @@ export function Contact() {
 					<motion.div
 						initial={{ opacity: 0, x: 30 }}
 						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6, delay: 0.2 }}
+						transition={{ duration: 0.9, delay: 0.2 }}
 					>
 						<div>
 							<h3 className="text-xl font-semibold mb-4">
@@ -253,7 +253,7 @@ export function Contact() {
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{ delay: 0.3, staggerChildren: 0.1 }}
+							transition={{ delay: 0.3, staggerChildren: 0.15 }}
 							className="space-y-4"
 						>
 							{[

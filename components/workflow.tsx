@@ -49,7 +49,7 @@ export function Workflow() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
+					transition={{ duration: 0.9 }}
 					className="text-center mb-16"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
@@ -71,7 +71,7 @@ export function Workflow() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6, delay: 0.1 }}
+					transition={{ duration: 0.9, delay: 0.15 }}
 					className="relative"
 				>
 					{/* Line */}
@@ -84,8 +84,8 @@ export function Workflow() {
 								initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
 								animate={isInView ? { opacity: 1, x: 0 } : {}}
 								transition={{
-									duration: 0.6,
-									delay: 0.2 + index * 0.15,
+									duration: 0.9,
+									delay: 0.2 + index * 0.2,
 								}}
 								className={`group relative flex items-start gap-8 ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"}`}
 							>
@@ -105,7 +105,7 @@ export function Workflow() {
 										animate={
 											isInView ? { opacity: 1, scale: 1 } : {}
 										}
-										transition={{ delay: 0.3 + index * 0.15 }}
+										transition={{ delay: 0.3 + index * 0.2 }}
 										className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono text-accent bg-accent/10 border border-accent/20 rounded-full mb-4"
 									>
 										0{index + 1}

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLogin() {
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
@@ -41,14 +42,34 @@ export default function AdminLogin() {
 			<form onSubmit={handleLogin} className="space-y-6">
 				<div>
 					<label className="block text-sm font-medium mb-2">Contraseña</label>
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						placeholder="••••••••"
-						required
-					/>
+					<div className="relative">
+						<input
+							type={showPassword ? "text" : "password"}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							className="w-full px-4 py-3 pr-12 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
+							placeholder="••••••••"
+							required
+							autoComplete="current-password"
+							suppressHydrationWarning
+						/>
+						<button
+							type="button"
+							onClick={() => setShowPassword((p) => !p)}
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+							aria-label={
+								showPassword
+									? "Ocultar contraseña"
+									: "Mostrar contraseña"
+							}
+						>
+							{showPassword ? (
+								<EyeOff className="w-5 h-5" />
+							) : (
+								<Eye className="w-5 h-5" />
+							)}
+						</button>
+					</div>
 					{error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 				</div>
 

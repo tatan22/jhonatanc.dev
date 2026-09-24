@@ -22,7 +22,7 @@ export function About() {
 					<motion.div
 						initial={{ opacity: 0, x: -30 }}
 						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6 }}
+						transition={{ duration: 0.9 }}
 					>
 						<span className="text-accent font-mono text-sm tracking-wider uppercase">
 							Sobre mi
@@ -71,7 +71,7 @@ export function About() {
 					<motion.div
 						initial={{ opacity: 0, x: 30 }}
 						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6, delay: 0.2 }}
+						transition={{ duration: 0.9, delay: 0.2 }}
 						className="grid grid-cols-2 gap-6"
 					>
 						{stats.map((stat, index) => (

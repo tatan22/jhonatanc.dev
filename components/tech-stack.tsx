@@ -29,7 +29,7 @@ export function TechStack() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
+					transition={{ duration: 0.9 }}
 					className="text-center mb-16"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
@@ -50,7 +50,7 @@ export function TechStack() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6, delay: 0.1 }}
+					transition={{ duration: 0.9, delay: 0.15 }}
 					className="grid md:grid-cols-3 gap-8"
 				>
 					{techCategories.map((group, groupIndex) => (
@@ -80,7 +80,7 @@ export function TechStack() {
 											delay:
 												0.3 +
 												groupIndex * 0.1 +
-												techIndex * 0.05,
+												techIndex * 0.08,
 										}}
 										className="px-4 py-2.5 text-sm font-medium rounded-xl border border-border/40 bg-secondary/40 backdrop-blur-sm hover:border-accent/40 hover:bg-accent/15 hover:text-accent hover:-translate-y-1 transition-all duration-300 ease-out cursor-default"
 									>

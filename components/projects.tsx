@@ -77,7 +77,7 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
+					transition={{ duration: 0.9 }}
 					className="text-center mb-20"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
@@ -95,7 +95,7 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6, delay: 0.1 }}
+					transition={{ duration: 0.9, delay: 0.15 }}
 					className="grid gap-10"
 				>
 					{projectsData.map((project, index) => {

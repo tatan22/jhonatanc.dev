@@ -1,35 +1,45 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ADMIN_SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
-export async function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
-
-	// Rutas públicas de admin (login/logout no requieren sesión)
-	if (pathname === "/api/admin/login" || pathname === "/api/admin/logout") {
-		return NextResponse.next();
-	}
-
-	const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-	const isAuthed = await verifySessionToken(token);
-
-	if (isAuthed) {
-		// Ya autenticado: no dejar que vea de nuevo el login
-		if (pathname === "/admin") {
-			return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-		}
-		return NextResponse.next();
-	}
-
-	// Sin sesión: bloquear dashboard y toda la API admin (incluye /api/setup)
-	if (pathname.startsWith("/admin")) {
-		const loginUrl = new URL("/admin", request.url);
-		loginUrl.searchParams.set("next", pathname);
-		return NextResponse.redirect(loginUrl);
-	}
-
-	return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-}
+const RATE_LIMITED_AUTH_PATHS = [
+	"/api/auth/sign-in",
+	"/api/auth/sign-up",
+	"/api/auth/forget-password",
+	"/api/auth/reset-password",
+	"/api/admin/login",
+	"/api/admin/setup",
+];
 
 export const config = {
-	matcher: ["/admin/:path*", "/admin", "/api/admin/:path*", "/api/setup"],
+	matcher: [
+		"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|imgs|images|profile.webp).*)",
+	],
 };
+
+export async function middleware(request: NextRequest) {
+	const url = request.nextUrl;
+
+	// Rate limiting en acciones sensibles de auth
+	if (RATE_LIMITED_AUTH_PATHS.some((path) => url.pathname.startsWith(path))) {
+		const ip = clientIp(request);
+		const rateResult = rateLimit(`auth:${ip}`, 5, 15 * 60 * 1000); // 5 req / 15 min
+		if (!rateResult.ok) {
+			return new NextResponse("Too Many Requests", {
+				status: 429,
+				headers: { "Retry-After": String(rateResult.retryAfterSeconds) },
+			});
+		}
+	}
+
+	// Headers de seguridad adicionales en respuesta
+	const response = NextResponse.next();
+	response.headers.set("X-Content-Type-Options", "nosniff");
+	response.headers.set("X-Frame-Options", "DENY");
+	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+	response.headers.set(
+		"Permissions-Policy",
+		"camera=(), microphone=(), geolocation=()",
+	);
+
+	return response;
+}

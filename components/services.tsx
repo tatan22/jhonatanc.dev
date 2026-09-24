@@ -45,7 +45,7 @@ export function Services() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
+					transition={{ duration: 0.9 }}
 					className="text-center mb-20"
 				>
 					<span className="text-accent font-mono text-sm tracking-wider uppercase">
@@ -67,7 +67,7 @@ export function Services() {
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6, delay: 0.1 }}
+					transition={{ duration: 0.9, delay: 0.15 }}
 					className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
 				>
 					{capabilities.map((item, index) => (
@@ -75,7 +75,7 @@ export function Services() {
 							key={item.title}
 							initial={{ opacity: 0, scale: 0.9, y: 20 }}
 							animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
-							transition={{ duration: 0.5, delay: 0.2 + index * 0.08 }}
+							transition={{ duration: 0.5, delay: 0.2 + index * 0.12 }}
 							className="group relative h-full p-6 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl overflow-hidden hover:border-accent/30 hover:bg-card/60 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 ease-out"
 						>
 							{/* BACKGROUND HOVER EFFECT */}
