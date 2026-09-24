@@ -1,13 +1,20 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { ExternalLink } from "lucide-react";
-import { Github } from "lucide-react";
+import { ExternalLink, Github } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { Reveal } from "@/components/reveal";
+import { Project, projectSlug } from "@/lib/db";
 
-const fallbackProjects = [
+type FallbackProject = {
+	title: string;
+	description: string;
+	image: string;
+	tech: string[];
+	liveUrl: string;
+	githubUrl: string;
+	featured: boolean;
+};
+
+const fallbackProjects: FallbackProject[] = [
 	{
 		title: "Veloce",
 		description:
@@ -40,122 +47,166 @@ const fallbackProjects = [
 	},
 ];
 
-import { Project } from "@/lib/db";
+type ProjectLike = Partial<Project> &
+	Pick<FallbackProject, "title" | "description" | "featured"> & {
+		image?: string;
+		image_url?: string;
+		tech?: string[];
+		tech_stack?: string[];
+		liveUrl?: string;
+		live_url?: string;
+		githubUrl?: string;
+		github_url?: string;
+	};
 
 export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
-	const projectsData = initialProjects && initialProjects.length > 0 ? initialProjects : fallbackProjects;
-	const ref = useRef(null);
-	const isInView = useInView(ref, { once: true, margin: "-100px" });
+	const projectsData: ProjectLike[] =
+		initialProjects && initialProjects.length > 0
+			? initialProjects
+			: fallbackProjects;
 
 	return (
-		<section id="projects" className="py-32 relative" ref={ref}>
+		<section id="projects" className="py-24 md:py-32 relative">
 			<div className="max-w-6xl mx-auto px-6">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
-					className="text-center mb-20"
-				>
-					<span className="text-accent font-mono text-sm tracking-wider uppercase">
+				<Reveal className="text-center mb-12 md:mb-20">
+					<span className="text-accent text-sm font-medium tracking-wider uppercase">
 						Proyectos
 					</span>
 					<h2 className="text-4xl md:text-5xl font-bold mt-4 mb-4">
 						Proyectos Destacados
 					</h2>
 					<p className="text-muted-foreground text-lg max-w-xl mx-auto">
-						Proyectos enfocados en interfaces modernas, experiencia de usuario y
-						desarrollo web escalable.
+						Proyectos enfocados en interfaces modernas, experiencia de
+						usuario y desarrollo web escalable.
 					</p>
-				</motion.div>
+				</Reveal>
 
 				<div className="grid gap-10">
-					{projectsData.map((project, index) => (
-						<motion.article
-							key={project.title}
-							initial={{ opacity: 0, y: 40 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{ duration: 0.6, delay: index * 0.15 }}
-							className={`group relative rounded-3xl overflow-hidden bg-card/30 backdrop-blur-xl border border-border/50 hover:border-accent/30 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-2 transition-all duration-500 ease-out ${
-								project.featured ? "lg:grid lg:grid-cols-2" : ""
-							}`}
-						>
-							{/* Image */}
-							<a
-								href={(project as any).liveUrl || (project as any).live_url || "#"}
-								target="_blank"
-								rel="noopener noreferrer"
-								className={`relative overflow-hidden block cursor-pointer ${project.featured ? "lg:h-auto h-80" : "h-80"}`}
-							>
-								<div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent z-10 lg:bg-linear-to-r lg:from-black/70 lg:via-black/30 lg:to-transparent" />
-								<Image
-									src={(() => {
-										const url = (project as any).image || (project as any).image_url;
-										if (!url || typeof url !== 'string' || url.trim() === '') {
-											return "/projects/portfolio.jpg";
-										}
-										return url;
-									})()}
-									alt={project.title}
-									fill
-									sizes="(max-width: 768px) 100vw, 50vw"
-									className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-								/>
-							</a>
+					{projectsData.map((project, index) => {
+						const liveUrl = project.liveUrl || project.live_url || "#";
+						const githubUrl =
+							project.githubUrl || project.github_url || "#";
+						const image =
+							project.image ||
+							project.image_url ||
+							"/projects/portfolio.jpg";
+						const tech = project.tech || project.tech_stack || [];
+						const hasId =
+							typeof (project as { id?: number }).id === "number";
+						const detailHref = hasId
+							? `/projects/${projectSlug(project as Project)}`
+							: null;
 
-							{/* Content */}
-							<div
-								className={`relative z-20 p-8 lg:p-10 ${project.featured ? "flex flex-col justify-center" : ""}`}
-							>
-								<a 
-									href={(project as any).liveUrl || (project as any).live_url || "#"}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-block"
+						return (
+							<Reveal key={project.title} delay={index * 0.15} y={40}>
+								<article
+									className={`group relative rounded-3xl overflow-hidden bg-card/40 border border-border/50 hover:border-accent/30 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-2 transition-all duration-500 ease-out ${
+										project.featured ? "lg:grid lg:grid-cols-2" : ""
+									}`}
 								>
-									<h3 className="text-2xl font-semibold mb-3 group-hover:text-accent group-hover:tracking-wide transition-all duration-300">
-										{project.title}
-									</h3>
-								</a>
-								<p className="text-muted-foreground mb-6 leading-relaxed">
-									{project.description}
-								</p>
-
-								{/* Tech stack */}
-								<div className="flex flex-wrap gap-2 mb-6">
-									{((project as any).tech || (project as any).tech_stack || []).map((tech: string) => (
-										<span
-											key={tech}
-											className="px-3 py-1.5 text-xs font-mono bg-secondary/50 border border-border rounded-lg text-muted-foreground"
-										>
-											{tech}
-										</span>
-									))}
-								</div>
-
-								{/* Links */}
-								<div className="flex items-center gap-4">
+									{/* Image */}
 									<a
-										href={(project as any).liveUrl || (project as any).live_url || "#"}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+										href={detailHref || liveUrl}
+										target={detailHref ? undefined : "_blank"}
+										rel={
+											detailHref
+												? undefined
+												: "noopener noreferrer"
+										}
+										className={`relative overflow-hidden block cursor-pointer ${project.featured ? "lg:h-auto h-80" : "h-80"}`}
+										aria-label={
+											detailHref
+												? `Ver detalle de ${project.title}`
+												: `Ver demo de ${project.title}`
+										}
 									>
-										<ExternalLink className="w-4 h-4" />
-										Demo
+										<div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent z-10 lg:bg-linear-to-r lg:from-black/70 lg:via-black/30 lg:to-transparent" />
+										<Image
+											src={image}
+											alt={project.title}
+											fill
+											sizes="(max-width: 768px) 100vw, 50vw"
+											className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+										/>
 									</a>
-									<a
-										href={(project as any).githubUrl || (project as any).github_url || "#"}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary/80 transition-all duration-300"
+
+									{/* Content */}
+									<div
+										className={`relative z-20 p-8 lg:p-10 ${project.featured ? "flex flex-col justify-center" : ""}`}
 									>
-										<Github className="w-4 h-4" />
-										GitHub
-									</a>
-								</div>
-							</div>
-						</motion.article>
-					))}
+										{detailHref ? (
+											<Link
+												href={detailHref}
+												className="inline-block"
+											>
+												<h3 className="text-2xl font-semibold mb-3 group-hover:text-accent group-hover:tracking-wide transition-all duration-300">
+													{project.title}
+												</h3>
+											</Link>
+										) : (
+											<a
+												href={liveUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-block"
+											>
+												<h3 className="text-2xl font-semibold mb-3 group-hover:text-accent group-hover:tracking-wide transition-all duration-300">
+													{project.title}
+												</h3>
+											</a>
+										)}
+										<p className="text-muted-foreground mb-6 leading-relaxed">
+											{project.description}
+										</p>
+
+										{/* Tech stack */}
+										<div className="flex flex-wrap gap-2 mb-6">
+											{tech.map((t: string) => (
+												<span
+													key={t}
+													className="px-3 py-1.5 text-xs font-medium bg-secondary/50 border border-border rounded-lg text-muted-foreground"
+												>
+													{t}
+												</span>
+											))}
+										</div>
+
+										{/* Links */}
+										<div className="flex items-center gap-4">
+											<a
+												href={liveUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												data-gtm-event="select_item"
+												data-gtm-value={project.title}
+												className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+											>
+												<ExternalLink
+													className="w-4 h-4"
+													aria-hidden
+												/>
+												Demo
+											</a>
+											<a
+												href={githubUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												data-gtm-event="select_item"
+												data-gtm-value={`${project.title} (github)`}
+												className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary/80 transition-all duration-300"
+											>
+												<Github
+													className="w-4 h-4"
+													aria-hidden
+												/>
+												GitHub
+											</a>
+										</div>
+									</div>
+								</article>
+							</Reveal>
+						);
+					})}
 				</div>
 			</div>
 		</section>

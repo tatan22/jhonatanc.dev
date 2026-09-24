@@ -1,13 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, ArrowUp } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
+import { ScrollTopButton } from "@/components/scroll-top-button";
 
 export function Footer() {
-	const scrollToTop = () => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	};
-
 	return (
 		<footer className="py-12 border-t border-border/40 relative">
 			<div className="max-w-6xl mx-auto px-6">
@@ -17,7 +11,6 @@ export function Footer() {
 						<a href="#" className="text-2xl font-bold tracking-tight">
 							JhonatanCardona
 							<span className="text-accent">.Dev</span>
-              
 						</a>
 
 						<p className="text-sm text-muted-foreground mt-2">
@@ -26,7 +19,10 @@ export function Footer() {
 					</div>
 
 					{/* Social links */}
-					<div className="flex items-center gap-4">
+					<nav
+						aria-label="Redes sociales"
+						className="flex items-center gap-4"
+					>
 						{[
 							{
 								icon: Github,
@@ -49,24 +45,16 @@ export function Footer() {
 								href={href}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="p-3 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-accent hover:border-accent/40 hover:bg-accent/10 hover:-translate-y-1 transition-all duration-300"
+								className="p-3 rounded-2xl border border-border/40 bg-background/40 text-muted-foreground hover:text-accent hover:border-accent/40 hover:bg-accent/10 hover:-translate-y-1 transition-all duration-300"
 								aria-label={label}
 							>
-								<Icon className="w-5 h-5" />
+								<Icon className="w-5 h-5" aria-hidden />
 							</a>
 						))}
-					</div>
+					</nav>
 
 					{/* Back to top */}
-					<motion.button
-						onClick={scrollToTop}
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						className="p-3 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-accent hover:border-accent/40 hover:bg-accent/10 transition-all duration-300"
-						aria-label="Volver arriba"
-					>
-						<ArrowUp className="w-5 h-5" />
-					</motion.button>
+					<ScrollTopButton />
 				</div>
 			</div>
 		</footer>

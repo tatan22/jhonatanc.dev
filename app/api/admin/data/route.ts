@@ -1,106 +1,166 @@
-import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
-import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
-import { getProfile, getProjects } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { sql } from "@vercel/postgres";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { getProfile, getProjects } from "@/lib/db";
+import { ADMIN_SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-// Check if user is authenticated
-function isAuthenticated() {
-  const session = cookies().get('admin_session');
-  return session?.value === 'authenticated';
+// Verificación independiente del middleware (defensa en profundidad)
+async function isAuthenticated() {
+	const session = cookies().get(ADMIN_SESSION_COOKIE);
+	return await verifySessionToken(session?.value);
 }
 
 export async function GET() {
-  if (!isAuthenticated()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!(await isAuthenticated()))
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  try {
-    const profile = await getProfile();
-    const projects = await getProjects();
-    return NextResponse.json({ profile, projects });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
-  }
+	try {
+		const profile = await getProfile();
+		const projects = await getProjects();
+		return NextResponse.json({ profile, projects });
+	} catch {
+		return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+	}
 }
 
 export async function PUT(request: Request) {
-  if (!isAuthenticated()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!(await isAuthenticated()))
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
-  const data = await request.json();
+	const { searchParams } = new URL(request.url);
+	const type = searchParams.get("type");
+	const data = await request.json();
 
-  try {
-    if (type === 'profile') {
-      const { name, role, bio, image_url, location } = data;
-      try {
-        await sql`
+	try {
+		if (type === "profile") {
+			const { name, role, bio, image_url, location } = data as Record<
+				string,
+				string
+			>;
+			try {
+				await sql`
           UPDATE profiles 
           SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url}, location = ${location}
           WHERE id = (SELECT id FROM profiles ORDER BY id LIMIT 1)
         `;
-        revalidatePath('/');
-        return NextResponse.json({ success: true });
-      } catch (err: any) {
-        console.error(err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
-      }
-    } 
-    else if (type === 'project') {
-      const { id, title, description, image_url, tech_stack, live_url, github_url, featured, order_index } = data;
-      await sql`
+				revalidatePath("/");
+				return NextResponse.json({ success: true });
+			} catch (err) {
+				console.error(err);
+				return NextResponse.json(
+					{ error: err instanceof Error ? err.message : "Unknown error" },
+					{ status: 500 },
+				);
+			}
+		} else if (type === "project") {
+			const {
+				id,
+				title,
+				description,
+				image_url,
+				tech_stack,
+				live_url,
+				github_url,
+				featured,
+				order_index,
+			} = data as {
+				id: number;
+				title: string;
+				description: string;
+				image_url: string;
+				tech_stack: string[];
+				live_url: string;
+				github_url: string;
+				featured: boolean;
+				order_index: number;
+			};
+			await sql`
         UPDATE projects 
         SET title = ${title}, description = ${description}, image_url = ${image_url}, 
-            tech_stack = ${`{${tech_stack.join(',')}}`}, live_url = ${live_url}, github_url = ${github_url}, 
+            tech_stack = ${`{${tech_stack.join(",")}}`}, live_url = ${live_url}, github_url = ${github_url}, 
             featured = ${featured}, order_index = ${order_index}
         WHERE id = ${id}
       `;
-      revalidatePath('/');
-      return NextResponse.json({ success: true });
-    }
-    return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+			revalidatePath("/");
+			return NextResponse.json({ success: true });
+		}
+		return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+	} catch (error) {
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : "Unknown error" },
+			{ status: 500 },
+		);
+	}
 }
 
 export async function POST(request: Request) {
-  if (!isAuthenticated()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!(await isAuthenticated()))
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
-  const data = await request.json();
+	const { searchParams } = new URL(request.url);
+	const type = searchParams.get("type");
+	const data = await request.json();
 
-  try {
-    if (type === 'project') {
-      const { title, description, image_url, tech_stack, live_url, github_url, featured, order_index } = data;
-      await sql`
+	try {
+		if (type === "project") {
+			const {
+				title,
+				description,
+				image_url,
+				tech_stack,
+				live_url,
+				github_url,
+				featured,
+				order_index,
+			} = data as {
+				title: string;
+				description: string;
+				image_url: string;
+				tech_stack: string[];
+				live_url: string;
+				github_url: string;
+				featured: boolean;
+				order_index: number;
+			};
+			await sql`
         INSERT INTO projects (title, description, image_url, tech_stack, live_url, github_url, featured, order_index)
-        VALUES (${title}, ${description}, ${image_url}, ${`{${tech_stack.join(',')}}`}, ${live_url}, ${github_url}, ${featured}, ${order_index})
+        VALUES (${title}, ${description}, ${image_url}, ${`{${tech_stack.join(",")}}`}, ${live_url}, ${github_url}, ${featured}, ${order_index})
       `;
-      revalidatePath('/');
-      return NextResponse.json({ success: true });
-    }
-    return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+			revalidatePath("/");
+			return NextResponse.json({ success: true });
+		}
+		return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+	} catch (error) {
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : "Unknown error" },
+			{ status: 500 },
+		);
+	}
 }
 
 export async function DELETE(request: Request) {
-  if (!isAuthenticated()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!(await isAuthenticated()))
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
-  const id = searchParams.get('id');
+	const { searchParams } = new URL(request.url);
+	const type = searchParams.get("type");
+	const id = searchParams.get("id");
 
-  try {
-    if (type === 'project' && id) {
-      await sql`DELETE FROM projects WHERE id = ${id}`;
-      revalidatePath('/');
-      return NextResponse.json({ success: true });
-    }
-    return NextResponse.json({ error: 'Invalid type or missing id' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+	try {
+		if (type === "project" && id) {
+			await sql`DELETE FROM projects WHERE id = ${id}`;
+			revalidatePath("/");
+			return NextResponse.json({ success: true });
+		}
+		return NextResponse.json(
+			{ error: "Invalid type or missing id" },
+			{ status: 400 },
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : "Unknown error" },
+			{ status: 500 },
+		);
+	}
 }

@@ -1,25 +1,24 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { Reveal } from "@/components/reveal";
 import { Send, Github, Linkedin, Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function Contact() {
-	const ref = useRef(null);
-	const isInView = useInView(ref, { once: true, margin: "-100px" });
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setIsSubmitting(true);
-		
+
 		const formData = new FormData(e.currentTarget);
 		const data = {
 			name: formData.get("name"),
 			email: formData.get("email"),
 			message: formData.get("message"),
+			website: formData.get("website") ?? "",
 		};
 
 		try {
@@ -31,69 +30,78 @@ export function Contact() {
 				body: JSON.stringify(data),
 			});
 
-			if (!res.ok) throw new Error("Error al enviar el mensaje");
-			
+			if (res.status === 429) {
+				toast.error("Demasiados mensajes seguidos. Intenta en unos minutos.");
+				return;
+			}
+			if (!res.ok) {
+				const payload: { issues?: Record<string, string[]> } | null = await res
+					.json()
+					.catch(() => null);
+				const firstIssue = payload?.issues
+					? Object.values(payload.issues).flat()[0]
+					: null;
+				throw new Error(firstIssue || "Error al enviar el mensaje");
+			}
+
 			setIsSubmitted(true);
 			toast.success("Mensaje enviado correctamente");
 		} catch (error) {
-			toast.error("Hubo un problema al enviar el mensaje. Intenta nuevamente.");
+			const msg =
+				error instanceof Error
+					? error.message
+					: "Hubo un problema al enviar el mensaje. Intenta nuevamente.";
+			toast.error(msg);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
 	return (
-		<section id="contact" className="py-32 relative" ref={ref}>
+		<section id="contact" className="py-24 md:py-32 relative">
 			<div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/2 to-transparent" />
 
 			<div className="relative max-w-6xl mx-auto px-6">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.6 }}
-					className="text-center mb-16"
-				>
-					<span className="text-accent font-mono text-sm tracking-wider uppercase">
+				<Reveal className="text-center mb-10 md:mb-16">
+					<span className="text-accent text-sm font-medium tracking-wider uppercase">
 						Contacto
 					</span>
 
 					<h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mt-4 mb-6 leading-tight">
 						Trabajemos en algo
-						<span className="block bg-linear-to-r from-accent to-blue-400 bg-clip-text text-transparent">
-							increíble juntos
-						</span>
+						<span className="block text-accent">increíble juntos</span>
 					</h2>
 
 					<p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-						¿Tienes una idea o proyecto en mente? Estoy abierto a colaborar en
-						interfaces modernas, dashboards, landing pages y aplicaciones web.
+						¿Tienes una idea o proyecto en mente? Estoy abierto a colaborar
+						en interfaces modernas, dashboards, landing pages y aplicaciones
+						web.
 					</p>
-				</motion.div>
+				</Reveal>
 
-				<div className="grid lg:grid-cols-2 gap-16">
+				<div className="grid lg:grid-cols-2 gap-10 md:gap-16">
 					{/* Contact form */}
-					<motion.div
-						initial={{ opacity: 0, x: -30 }}
-						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6, delay: 0.2 }}
-					>
+					<Reveal delay={0.2} y={30}>
 						{isSubmitted ? (
 							<div className="h-full flex items-center justify-center">
 								<div className="text-center">
 									<div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6">
 										<Send className="w-8 h-8 text-accent" />
 									</div>
-									<h3 className="text-2xl font-bold mb-2">¡Mensaje enviado!</h3>
+									<h3 className="text-2xl font-bold mb-2">
+										¡Mensaje enviado!
+									</h3>
 
 									<p className="text-muted-foreground">
-										Gracias por contactarme. Te responderé lo antes posible.
+										Gracias por contactarme. Te responderé lo antes
+										posible.
 									</p>
 								</div>
 							</div>
 						) : (
 							<form
 								onSubmit={handleSubmit}
-								className="space-y-6 rounded-3xl border border-border/40 bg-background/40 backdrop-blur-xl p-8"
+								className="space-y-6 rounded-3xl border border-border/40 bg-background/40 p-8"
 							>
 								<div>
 									<label
@@ -143,6 +151,22 @@ export function Contact() {
 										placeholder="Cuéntame sobre tu proyecto..."
 									/>
 								</div>
+								{/* Honeypot anti-spam: invisible para humanos */}
+								<div
+									className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+									aria-hidden="true"
+								>
+									<label htmlFor="website">
+										No llenar este campo
+									</label>
+									<input
+										type="text"
+										id="website"
+										name="website"
+										tabIndex={-1}
+										autoComplete="off"
+									/>
+								</div>
 								<button
 									type="submit"
 									disabled={isSubmitting}
@@ -162,21 +186,18 @@ export function Contact() {
 								</button>
 							</form>
 						)}
-					</motion.div>
+					</Reveal>
 
 					{/* Contact info */}
-					<motion.div
-						initial={{ opacity: 0, x: 30 }}
-						animate={isInView ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.6, delay: 0.3 }}
-						className="space-y-8"
-					>
+					<Reveal delay={0.3} y={30} className="space-y-8">
 						<div>
-							<h3 className="text-xl font-semibold mb-4">Conecta conmigo</h3>
+							<h3 className="text-xl font-semibold mb-4">
+								Conecta conmigo
+							</h3>
 							<p className="text-muted-foreground leading-relaxed mb-8">
-								Si tienes una idea, proyecto o simplemente quieres conversar
-								sobre desarrollo web, puedes escribirme directamente o conectar
-								conmigo en redes profesionales.
+								Si tienes una idea, proyecto o simplemente quieres
+								conversar sobre desarrollo web, puedes escribirme
+								directamente o conectar conmigo en redes profesionales.
 							</p>
 						</div>
 
@@ -206,7 +227,7 @@ export function Contact() {
 									href={item.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="flex items-center gap-4 p-4 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-sm hover:border-accent/50 hover:bg-accent/5 hover:-translate-y-1 transition-all duration-300 group"
+									className="flex items-center gap-4 p-4 rounded-2xl border border-border/40 bg-background/40 hover:border-accent/50 hover:bg-accent/5 hover:-translate-y-1 transition-all duration-300 group"
 								>
 									<div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
 										<item.icon className="w-5 h-5 text-accent" />
@@ -222,7 +243,7 @@ export function Contact() {
 								</a>
 							))}
 						</div>
-					</motion.div>
+					</Reveal>
 				</div>
 			</div>
 		</section>
