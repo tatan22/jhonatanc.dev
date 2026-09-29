@@ -42,7 +42,7 @@ export function Workflow() {
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
 
 	return (
-		<section id="workflow" className="py-32 relative" ref={ref}>
+		<section id="workflow" className="py-16 md:py-24 lg:py-32 relative" ref={ref}>
 			<div className="absolute inset-0 bg-linear-to-b from-transparent via-accent/2 to-transparent" />
 
 			<div className="relative max-w-6xl mx-auto px-6">

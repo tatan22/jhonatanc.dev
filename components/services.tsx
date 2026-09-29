@@ -40,7 +40,7 @@ export function Services() {
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
 
 	return (
-		<section id="services" className="py-32 relative" ref={ref}>
+		<section id="services" className="py-16 md:py-24 lg:py-32 relative" ref={ref}>
 			<div className="relative max-w-6xl mx-auto px-6">
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}

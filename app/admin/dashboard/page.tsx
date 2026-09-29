@@ -7,24 +7,25 @@ import {
 	Plus,
 	Save,
 	Trash2,
-	LogOut,
 	Image as ImgIcon,
 	ExternalLink,
 	Github,
-	Check,
 	Search,
-	Filter,
-	Copy,
 	AlertTriangle,
-	Settings,
+	Pencil,
 	X,
+	Star,
 } from "lucide-react";
 import { UploadButton } from "@/lib/uploadthing";
 import type { Profile, Project } from "@/lib/db";
 import { useToast } from "@/components/ui/use-toast";
 
 type ProfileDraft = Partial<Profile>;
-type ProjectDraft = Partial<Project> & { id?: number; isNew?: boolean };
+type ProjectDraft = Partial<Project> & {
+	id?: number;
+	isNew?: boolean;
+	_key: string;
+};
 
 const TECH_OPTIONS = [
 	"Next.js",
@@ -37,11 +38,31 @@ const TECH_OPTIONS = [
 	"Drizzle ORM",
 	"Prisma",
 	"Better Auth",
+	"Pusher",
 	"Framer Motion",
 	"AI SDK",
 	"shadcn/ui",
 	"Vercel",
 	"Docker",
+];
+
+const PROFILE_FIELDS: Array<{
+	key: keyof Profile;
+	label: string;
+	placeholder?: string;
+	type?: string;
+	span?: boolean;
+}> = [
+	{ key: "name", label: "Nombre" },
+	{ key: "role", label: "Rol / Título" },
+	{ key: "location", label: "Ubicación", placeholder: "Pereira, Colombia" },
+	{ key: "email", label: "Email", placeholder: "tucorreo@dominio.com" },
+	{ key: "github_url", label: "GitHub URL", placeholder: "https://github.com/..." },
+	{
+		key: "linkedin_url",
+		label: "LinkedIn URL",
+		placeholder: "https://linkedin.com/in/...",
+	},
 ];
 
 export default function AdminDashboard() {
@@ -56,8 +77,8 @@ export default function AdminDashboard() {
 	const [filterFeatured, setFilterFeatured] = useState<
 		"all" | "featured" | "unfeatured"
 	>("all");
-	const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
-	const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+	const [editingKey, setEditingKey] = useState<string | null>(null);
+	const [deleteKey, setDeleteKey] = useState<string | null>(null);
 
 	const fetchData = useCallback(async () => {
 		try {
@@ -72,7 +93,12 @@ export default function AdminDashboard() {
 			}
 			const data = await res.json();
 			setProfile(data.profile || {});
-			setProjects(data.projects || []);
+			setProjects(
+				(data.projects || []).map((p: Project): ProjectDraft => ({
+					...p,
+					_key: `p-${p.id}`,
+				})),
+			);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 			toast({
@@ -108,6 +134,12 @@ export default function AdminDashboard() {
 			.sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
 	}, [projects, searchQuery, filterFeatured]);
 
+	const patchProject = useCallback((key: string, patch: Partial<ProjectDraft>) => {
+		setProjects((prev) =>
+			prev.map((p) => (p._key === key ? { ...p, ...patch } : p)),
+		);
+	}, []);
+
 	const handleSaveProfile = async () => {
 		setIsSaving((prev) => ({ ...prev, profile: true }));
 		try {
@@ -136,20 +168,32 @@ export default function AdminDashboard() {
 	};
 
 	const handleSaveProject = async (project: ProjectDraft) => {
-		const key = project.id?.toString() || "new";
+		const key = project._key;
 		setIsSaving((prev) => ({ ...prev, [key]: true }));
 		try {
 			const isNew = !project.id || project.isNew;
+			const payload = {
+				id: project.id,
+				title: project.title || "",
+				description: project.description || "",
+				image_url: project.image_url || "",
+				tech_stack: project.tech_stack || [],
+				live_url: project.live_url || "",
+				github_url: project.github_url || "",
+				featured: project.featured || false,
+				order_index: project.order_index || 0,
+			};
 			const res = await fetch(`/api/admin/data?type=project`, {
 				method: isNew ? "POST" : "PUT",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(project),
+				body: JSON.stringify(payload),
 			});
 			if (!res.ok) {
 				const errorData = await res.json();
 				throw new Error(errorData.error || "Error guardando");
 			}
 			toast({ title: isNew ? "Proyecto creado" : "Proyecto actualizado" });
+			setEditingKey(null);
 			fetchData();
 		} catch (error) {
 			toast({
@@ -162,22 +206,27 @@ export default function AdminDashboard() {
 		}
 	};
 
-	const handleDeleteProject = async (id: number) => {
-		setDeleteConfirmId(null);
-		setIsSaving((prev) => ({ ...prev, [`delete-${id}`]: true }));
+	const handleDeleteProject = async (project: ProjectDraft) => {
+		setDeleteKey(null);
+		setIsSaving((prev) => ({ ...prev, [`delete-${project._key}`]: true }));
 		try {
-			await fetch(`/api/admin/data?type=project&id=${id}`, { method: "DELETE" });
-			setProjects((prev) => prev.filter((p) => p.id !== id));
+			const res = await fetch(`/api/admin/data?type=project&id=${project.id}`, {
+				method: "DELETE",
+			});
+			if (!res.ok) throw new Error("Error eliminando");
+			setProjects((prev) => prev.filter((p) => p._key !== project._key));
 			toast({ title: "Proyecto eliminado" });
 		} catch {
 			toast({ title: "Error borrando proyecto", variant: "destructive" });
 		} finally {
-			setIsSaving((prev) => ({ ...prev, [`delete-${id}`]: false }));
+			setIsSaving((prev) => ({ ...prev, [`delete-${project._key}`]: false }));
 		}
 	};
 
 	const handleAddProject = () => {
+		const key = `new-${Date.now()}`;
 		const newProject: ProjectDraft = {
+			_key: key,
 			title: "",
 			description: "",
 			image_url: "",
@@ -189,21 +238,25 @@ export default function AdminDashboard() {
 			isNew: true,
 		};
 		setProjects((prev) => [newProject, ...prev]);
-		setEditingProjectId(Date.now());
+		setEditingKey(key);
 	};
 
-	const handleImageUpload =
-		(setter: (url: string) => void) => (res: { url: string }[]) => {
+	const handleCancelEdit = (project: ProjectDraft) => {
+		if (project.isNew && !project.id) {
+			setProjects((prev) => prev.filter((p) => p._key !== project._key));
+		}
+		setEditingKey(null);
+	};
+
+	const handleUploaded =
+		(key: string) => (res: { url: string; ufsUrl?: string }[]) => {
 			if (res && res[0]) {
-				setter(res[0].url);
-				toast({
-					title: "Imagen subida",
-					description: "URL actualizada automáticamente",
-				});
+				patchProject(key, { image_url: res[0].ufsUrl || res[0].url });
+				toast({ title: "Imagen subida", description: "URL actualizada" });
 			}
 		};
 
-	const handleImageError = (err: Error) => {
+	const uploadError = (err: Error) => {
 		toast({
 			title: "Error subiendo imagen",
 			description: err.message,
@@ -211,889 +264,713 @@ export default function AdminDashboard() {
 		});
 	};
 
-	const copyToClipboard = (text: string, label: string) => {
-		navigator.clipboard.writeText(text);
-		toast({ title: `${label} copiado` });
-	};
-
 	if (isLoading) {
 		return (
-			<div className="flex justify-center items-center h-64">
-				<Loader2 className="w-8 h-8 animate-spin text-accent" />
+			<div className="pb-16">
+				<div className="mb-8 h-8 w-40 animate-pulse rounded-lg bg-secondary/40" />
+				<div className="h-72 animate-pulse rounded-2xl bg-secondary/30" />
 			</div>
 		);
 	}
 
-	// Render projects list separately to avoid ternary nesting issues
-	const renderProjects = () => {
-		if (filteredProjects.length === 0) {
-			return (
-				<div className="text-center py-12 bg-card/40 border border-border/40 rounded-2xl">
-					<Plus className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-					<h3 className="text-lg font-medium mb-2">No hay proyectos</h3>
-					<p className="text-muted-foreground mb-4">
-						{searchQuery || filterFeatured !== "all"
-							? "No hay proyectos que coincidan con tu búsqueda"
-							: "Crea tu primer proyecto para empezar"}
-					</p>
-					<button
-						onClick={handleAddProject}
-						className="px-6 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/80 transition-colors"
-					>
-						<Plus className="w-4 h-4 inline mr-2" />
-						Crear proyecto
-					</button>
-				</div>
-			);
-		}
-
-		return (
-			<div className="space-y-4">
-				{filteredProjects.map((project, index) => {
-					const projectKey = project.id?.toString() || `new-${index}`;
-					const isEditing = editingProjectId === (project.id || index);
-					const projectIsSaving =
-						isSaving[projectKey] || isSaving[`delete-${project.id}`];
-					const isDeleting = isSaving[`delete-${project.id}`];
-
-					return (
-						<div
-							key={projectKey}
-							className={`bg-card/40 border border-border/40 rounded-2xl overflow-hidden transition-all ${
-								isEditing ? "ring-2 ring-accent/50" : ""
-							}`}
-						>
-							<div className="p-4 border-b border-border/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-								<div className="flex items-center gap-3 flex-1 min-w-0">
-									<div
-										className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0"
-										style={{
-											backgroundImage: project.image_url
-												? `url(${project.image_url})`
-												: "none",
-											backgroundSize: "cover",
-											backgroundPosition: "center",
-										}}
-									>
-										{!project.image_url && (
-											<ImgIcon className="w-5 h-5 text-accent" />
-										)}
-									</div>
-									<div className="min-w-0">
-										<input
-											type="text"
-											value={project.title || ""}
-											onChange={(e) => {
-												setProjects((prev) => {
-													const next = [...prev];
-													const i = prev.findIndex(
-														(p) =>
-															p.id === project.id ||
-															(p.isNew &&
-																prev.indexOf(p) ===
-																	index),
-													);
-													if (i >= 0)
-														next[i] = {
-															...next[i],
-															title: e.target.value,
-														};
-													return next;
-												});
-											}}
-											className={`font-medium text-lg bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-accent rounded px-1 ${!project.title ? "text-muted-foreground placeholder:text-muted-foreground/50" : ""}`}
-											placeholder="Título del proyecto..."
-											disabled={!isEditing}
-										/>
-										<div className="flex items-center gap-2 text-xs text-muted-foreground">
-											{project.id && (
-												<span className="px-2 py-0.5 bg-secondary/50 rounded-full font-mono">
-													ID: {project.id}
-												</span>
-											)}
-											{project.isNew && (
-												<span className="px-2 py-0.5 bg-accent/10 text-accent rounded-full">
-													Nuevo
-												</span>
-											)}
-											{project.featured && (
-												<span className="px-2 py-0.5 bg-amber/10 text-amber rounded-full flex items-center gap-1">
-													<span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
-													Destacado
-												</span>
-											)}
-										</div>
-									</div>
-								</div>
-								<div className="flex items-center gap-2">
-									{project.id && project.live_url && (
-										<a
-											href={project.live_url}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
-											title="Ver demo"
-										>
-											<ExternalLink className="w-4 h-4" />
-										</a>
-									)}
-									{project.id && project.github_url && (
-										<a
-											href={project.github_url}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
-											title="Ver código"
-										>
-											<Github className="w-4 h-4" />
-										</a>
-									)}
-									<button
-										onClick={() =>
-											setEditingProjectId(project.id || index)
-										}
-										className={`p-2 rounded-lg transition-colors ${isEditing ? "bg-accent/10 text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}`}
-										title={
-											isEditing ? "Terminar edición" : "Editar"
-										}
-									>
-										{isEditing ? (
-											<Check className="w-4 h-4" />
-										) : (
-											<Settings className="w-4 h-4" />
-										)}
-									</button>
-									<button
-										onClick={() => setDeleteConfirmId(project.id!)}
-										disabled={!project.id || isDeleting}
-										className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
-										title="Eliminar"
-									>
-										<Trash2 className="w-4 h-4" />
-									</button>
-								</div>
-							</div>
-
-							{isEditing && (
-								<div className="p-4 bg-secondary/30 border-t border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-										<div>
-											<label className="block text-sm mb-2 text-muted-foreground">
-												URL Imagen
-											</label>
-											<div className="flex gap-2">
-												<input
-													type="text"
-													value={project.image_url || ""}
-													onChange={(e) => {
-														setProjects((prev) => {
-															const next = [...prev];
-															const i = prev.findIndex(
-																(p) =>
-																	p.id ===
-																		project.id ||
-																	(p.isNew &&
-																		prev.indexOf(
-																			p,
-																		) === index),
-															);
-															if (i >= 0)
-																next[i] = {
-																	...next[i],
-																	image_url:
-																		e.target.value,
-																};
-															return next;
-														});
-													}}
-													className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-													placeholder="https://..."
-												/>
-												<UploadButton
-													endpoint="imageUploader"
-													onClientUploadComplete={(res) => {
-														if (res && res[0]) {
-															setProjects((prev) => {
-																const next = [...prev];
-																const i =
-																	next.findIndex(
-																		(p) =>
-																			p.id ===
-																				project.id ||
-																			(p.isNew &&
-																				prev.indexOf(
-																					p,
-																				) ===
-																					index),
-																	);
-																if (i >= 0)
-																	next[i] = {
-																		...next[i],
-																		image_url:
-																			res[0].url,
-																	};
-																return next;
-															});
-															toast({
-																title: "Imagen subida",
-																description:
-																	"URL actualizada automáticamente",
-															});
-														}
-													}}
-													onUploadError={(err) => {
-														toast({
-															title: "Error subiendo imagen",
-															description: err.message,
-															variant: "destructive",
-														});
-													}}
-												/>
-											</div>
-										</div>
-										<div>
-											<label className="block text-sm mb-2 text-muted-foreground">
-												URL Demo
-											</label>
-											<div className="flex gap-2">
-												<input
-													type="text"
-													value={project.live_url || ""}
-													onChange={(e) => {
-														setProjects((prev) => {
-															const next = [...prev];
-															const i = prev.findIndex(
-																(p) =>
-																	p.id ===
-																		project.id ||
-																	(p.isNew &&
-																		prev.indexOf(
-																			p,
-																		) === index),
-															);
-															if (i >= 0)
-																next[i] = {
-																	...next[i],
-																	live_url:
-																		e.target.value,
-																};
-															return next;
-														});
-													}}
-													className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-													placeholder="https://demo.com"
-												/>
-												{project.live_url && (
-													<button
-														onClick={() =>
-															navigator.clipboard
-																.writeText(
-																	project.live_url!,
-																)
-																.then(() =>
-																	toast({
-																		title: "Demo URL copiada",
-																	}),
-																)
-														}
-														className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
-														title="Copiar URL"
-													>
-														<Copy className="w-4 h-4" />
-													</button>
-												)}
-											</div>
-										</div>
-										<div className="md:col-span-2">
-											<label className="block text-sm mb-2 text-muted-foreground">
-												Descripción
-											</label>
-											<textarea
-												value={project.description || ""}
-												onChange={(e) => {
-													setProjects((prev) => {
-														const next = [...prev];
-														const i = prev.findIndex(
-															(p) =>
-																p.id === project.id ||
-																(p.isNew &&
-																	prev.indexOf(p) ===
-																		index),
-														);
-														if (i >= 0)
-															next[i] = {
-																...next[i],
-																description:
-																	e.target.value,
-															};
-														return next;
-													});
-												}}
-												rows={2}
-												className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none"
-											/>
-										</div>
-										<div className="md:col-span-2">
-											<label className="block text-sm mb-2 text-muted-foreground">
-												Tecnologías
-											</label>
-											<div className="flex flex-wrap gap-2 mb-2">
-												{TECH_OPTIONS.map((tech) => (
-													<button
-														key={tech}
-														type="button"
-														onClick={() => {
-															setProjects((prev) => {
-																const next = [...prev];
-																const i =
-																	prev.findIndex(
-																		(p) =>
-																			p.id ===
-																				project.id ||
-																			(p.isNew &&
-																				prev.indexOf(
-																					p,
-																				) ===
-																					index),
-																	);
-																if (i >= 0) {
-																	const stack =
-																		next[i]
-																			.tech_stack ||
-																		[];
-																	next[i] = {
-																		...next[i],
-																		tech_stack:
-																			stack.includes(
-																				tech,
-																			)
-																				? stack.filter(
-																						(
-																							t,
-																						) =>
-																							t !==
-																							tech,
-																					)
-																				: [
-																						...stack,
-																						tech,
-																					],
-																	};
-																}
-																return next;
-															});
-														}}
-														className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-															project.tech_stack?.includes(
-																tech,
-															)
-																? "bg-accent text-accent-foreground border-accent"
-																: "bg-background border-border hover:border-accent/50"
-														}`}
-													>
-														{tech}
-													</button>
-												))}
-											</div>
-											<input
-												type="text"
-												value={
-													project.tech_stack?.join(", ") || ""
-												}
-												onChange={(e) => {
-													setProjects((prev) => {
-														const next = [...prev];
-														const i = prev.findIndex(
-															(p) =>
-																p.id === project.id ||
-																(p.isNew &&
-																	prev.indexOf(p) ===
-																		index),
-														);
-														if (i >= 0) {
-															next[i] = {
-																...next[i],
-																tech_stack:
-																	e.target.value
-																		.split(",")
-																		.map((t) =>
-																			t.trim(),
-																		)
-																		.filter(
-																			Boolean,
-																		),
-															};
-														}
-														return next;
-													});
-												}}
-												className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-												placeholder="O escribe tecnologías separadas por coma"
-											/>
-										</div>
-										<div>
-											<label className="block text-sm mb-2 text-muted-foreground">
-												GitHub URL
-											</label>
-											<div className="flex gap-2">
-												<input
-													type="text"
-													value={project.github_url || ""}
-													onChange={(e) => {
-														setProjects((prev) => {
-															const next = [...prev];
-															const i = prev.findIndex(
-																(p) =>
-																	p.id ===
-																		project.id ||
-																	(p.isNew &&
-																		prev.indexOf(
-																			p,
-																		) === index),
-															);
-															if (i >= 0)
-																next[i] = {
-																	...next[i],
-																	github_url:
-																		e.target.value,
-																};
-															return next;
-														});
-													}}
-													className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-													placeholder="https://github.com/..."
-												/>
-												{project.github_url && (
-													<button
-														onClick={() =>
-															navigator.clipboard
-																.writeText(
-																	project.github_url!,
-																)
-																.then(() =>
-																	toast({
-																		title: "GitHub URL copiada",
-																	}),
-																)
-														}
-														className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
-														title="Copiar URL"
-													>
-														<Copy className="w-4 h-4" />
-													</button>
-												)}
-											</div>
-										</div>
-										<div>
-											<label className="block text-sm mb-2 text-muted-foreground">
-												Orden
-											</label>
-											<input
-												type="number"
-												value={project.order_index || 0}
-												onChange={(e) => {
-													setProjects((prev) => {
-														const next = [...prev];
-														const i = prev.findIndex(
-															(p) =>
-																p.id === project.id ||
-																(p.isNew &&
-																	prev.indexOf(p) ===
-																		index),
-														);
-														if (i >= 0)
-															next[i] = {
-																...next[i],
-																order_index:
-																	parseInt(
-																		e.target.value,
-																	) || 0,
-															};
-														return next;
-													});
-												}}
-												className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-												min="0"
-											/>
-										</div>
-										<div className="flex items-center gap-3">
-											<label className="flex items-center gap-2 cursor-pointer flex-1">
-												<input
-													type="checkbox"
-													checked={project.featured || false}
-													onChange={(e) => {
-														setProjects((prev) => {
-															const next = [...prev];
-															const i = prev.findIndex(
-																(p) =>
-																	p.id ===
-																		project.id ||
-																	(p.isNew &&
-																		prev.indexOf(
-																			p,
-																		) === index),
-															);
-															if (i >= 0)
-																next[i] = {
-																	...next[i],
-																	featured:
-																		e.target
-																			.checked,
-																};
-															return next;
-														});
-													}}
-													className="w-4 h-4 rounded accent-accent"
-												/>
-												<span className="text-sm font-medium">
-													Proyecto Destacado
-												</span>
-											</label>
-										</div>
-									</div>
-									<div className="flex justify-end gap-3 pt-4 border-t border-border/40">
-										<button
-											onClick={() => setEditingProjectId(null)}
-											className="px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors text-sm"
-										>
-											Cancelar
-										</button>
-										<button
-											onClick={() => handleSaveProject(project)}
-											disabled={
-												isSaving[projectKey] ||
-												isSaving[`delete-${project.id}`]
-											}
-											className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-sm disabled:opacity-50"
-										>
-											<Save className="w-4 h-4" />
-											{isSaving[projectKey] ||
-											isSaving[`delete-${project.id}`]
-												? "Guardando..."
-												: project.isNew
-													? "Crear proyecto"
-													: "Guardar cambios"}
-										</button>
-									</div>
-								</div>
-							)}
-
-							{deleteConfirmId === project.id && (
-								<div className="p-4 bg-destructive/10 border-t border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-200">
-									<div className="flex items-center justify-between">
-										<div className="flex items-center gap-3">
-											<AlertTriangle className="w-5 h-5 text-destructive" />
-											<div>
-												<p className="font-medium">{`¿Eliminar "${project.title || "este proyecto"}"?`}</p>
-												<p className="text-sm text-muted-foreground">
-													Esta acción no se puede deshacer.
-												</p>
-											</div>
-										</div>
-										<div className="flex gap-2">
-											<button
-												onClick={() => setDeleteConfirmId(null)}
-												className="px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors text-sm"
-											>
-												Cancelar
-											</button>
-											<button
-												onClick={() =>
-													handleDeleteProject(project.id!)
-												}
-												disabled={
-													isSaving[`delete-${project.id}`]
-												}
-												className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/80 transition-colors text-sm disabled:opacity-50"
-											>
-												{isSaving[`delete-${project.id}`]
-													? "Eliminando..."
-													: "Sí, eliminar"}
-											</button>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
-					);
-				})}
-			</div>
-		);
-	};
-
 	return (
-		<div className="space-y-8 max-w-7xl mx-auto px-4 pb-12">
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-					<p className="text-muted-foreground text-sm mt-1">
-						Gestiona tu perfil y proyectos del portafolio
-					</p>
-				</div>
-				<div className="flex items-center gap-3">
-					<button
-						onClick={() => router.push("/")}
-						className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors text-sm"
-					>
-						<ExternalLink className="w-4 h-4" />
-						Ver sitio
-					</button>
-					<button
-						onClick={async () => {
-							await fetch("/api/admin/logout", { method: "POST" });
-							router.push("/admin");
-						}}
-						className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors text-sm"
-					>
-						<LogOut className="w-4 h-4" />
-						Salir
-					</button>
-				</div>
+		<div className="pb-4">
+			<div className="mb-8">
+				<h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+				<p className="text-sm text-muted-foreground">
+					Gestiona tu perfil y proyectos del portafolio
+				</p>
 			</div>
 
-			<section className="bg-card/40 border border-border/40 rounded-2xl p-6 backdrop-blur-xl">
-				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-					<h2 className="text-xl font-semibold flex items-center gap-2">
-						<span className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-							<ImgIcon className="w-4 h-4" />
-						</span>
-						Tu Perfil
-					</h2>
-					<button
-						onClick={async () => {
-							setIsSaving((prev) => ({ ...prev, profile: true }));
-							try {
-								const res = await fetch(
-									"/api/admin/data?type=profile",
-									{
-										method: "PUT",
-										headers: { "Content-Type": "application/json" },
-										body: JSON.stringify(profile),
-									},
-								);
-								if (!res.ok) {
-									const errorData = await res.json();
-									throw new Error(
-										errorData.error || "Error guardando",
-									);
-								}
-								toast({
-									title: "Perfil guardado",
-									description: "Cambios aplicados correctamente",
-								});
-							} catch (error) {
-								toast({
-									title: "Error guardando perfil",
-									description:
-										error instanceof Error ? error.message : "",
-									variant: "destructive",
-								});
-							} finally {
-								setIsSaving((prev) => ({ ...prev, profile: false }));
-							}
-						}}
-						disabled={isSaving.profile}
-						className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
-					>
-						<Save className="w-4 h-4" />
-						{isSaving.profile ? "Guardando..." : "Guardar Perfil"}
-					</button>
+			{/* Perfil */}
+			<section className="mb-12">
+				<div className="mb-5 flex items-center gap-3">
+					<h2 className="text-lg font-semibold">Tu perfil</h2>
+					<span className="text-sm text-muted-foreground">
+						Datos que se muestran en la portada
+					</span>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							Nombre
-						</label>
-						<input
-							type="text"
-							value={profile?.name || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, name: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							Rol / Título
-						</label>
-						<input
-							type="text"
-							value={profile?.role || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, role: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
-					</div>
-					<div className="md:col-span-2 lg:col-span-3">
-						<label className="block text-sm mb-2 text-muted-foreground">
-							Bio
-						</label>
-						<textarea
-							value={profile?.bio || ""}
-							rows={3}
-							onChange={(e) =>
-								setProfile({ ...profile, bio: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all resize-none"
-						/>
-					</div>
-					<div className="md:col-span-2 lg:col-span-3">
-						<label className="block text-sm mb-2 text-muted-foreground">
-							URL Imagen
-						</label>
-						<div className="flex gap-4 items-start">
-							<input
-								type="text"
-								value={profile?.image_url || ""}
-								onChange={(e) =>
-									setProfile({
-										...profile,
-										image_url: e.target.value,
-									})
-								}
-								className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-								placeholder="https://..."
-							/>
-							<UploadButton
-								endpoint="imageUploader"
-								onClientUploadComplete={(res) => {
-									if (res && res[0]) {
-										setProfile({
-											...profile,
-											image_url: res[0].url,
-										});
-										toast({
-											title: "Imagen subida",
-											description:
-												"URL actualizada automáticamente",
-										});
-									}
-								}}
-								onUploadError={(err) => {
+				<div className="grid gap-6 rounded-2xl border border-border/40 bg-card/40 p-6 lg:grid-cols-[220px_1fr]">
+					{/* Avatar */}
+					<div className="flex flex-col gap-3">
+						<div
+							role="img"
+							aria-label="Vista previa de la foto de perfil"
+							className="aspect-square w-full max-w-[220px] rounded-2xl border border-border/40 bg-secondary/40 bg-cover bg-center"
+							style={{
+								backgroundImage: profile?.image_url
+									? `url(${profile.image_url})`
+									: "none",
+							}}
+						>
+							{!profile?.image_url && (
+								<div className="flex h-full items-center justify-center text-muted-foreground">
+									<ImgIcon className="h-8 w-8" />
+								</div>
+							)}
+						</div>
+						<UploadButton
+							endpoint="imageUploader"
+							content={{
+								button: "Subir foto",
+								allowedContent: "JPG, PNG · máx. 4MB",
+							}}
+							onClientUploadComplete={(res) => {
+								if (res && res[0]) {
+									setProfile((prev) => ({
+										...prev,
+										image_url: res[0].ufsUrl || res[0].url,
+									}));
 									toast({
-										title: "Error subiendo imagen",
-										description: err.message,
-										variant: "destructive",
+										title: "Imagen subida",
+										description: "No olvides guardar",
 									});
-								}}
+								}
+							}}
+							onUploadError={uploadError}
+						/>
+					</div>
+
+					{/* Campos */}
+					<div className="grid content-start gap-4 sm:grid-cols-2">
+						{PROFILE_FIELDS.map((field) => (
+							<div key={field.key}>
+								<label
+									htmlFor={`profile-${field.key}`}
+									className="mb-1.5 block text-sm text-muted-foreground"
+								>
+									{field.label}
+								</label>
+								<input
+									id={`profile-${field.key}`}
+									type={field.type || "text"}
+									value={(profile?.[field.key] as string) || ""}
+									placeholder={field.placeholder}
+									onChange={(e) =>
+										setProfile((prev) => ({
+											...prev,
+											[field.key]: e.target.value,
+										}))
+									}
+									className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+								/>
+							</div>
+						))}
+						<div className="sm:col-span-2">
+							<label
+								htmlFor="profile-bio"
+								className="mb-1.5 block text-sm text-muted-foreground"
+							>
+								Bio
+							</label>
+							<textarea
+								id="profile-bio"
+								rows={3}
+								value={profile?.bio || ""}
+								placeholder="Una o dos frases sobre lo que haces y para quién."
+								onChange={(e) =>
+									setProfile((prev) => ({
+										...prev,
+										bio: e.target.value,
+									}))
+								}
+								className="w-full resize-none rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 							/>
 						</div>
 					</div>
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							Ubicación
-						</label>
-						<input
-							type="text"
-							value={profile?.location || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, location: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							GitHub URL
-						</label>
-						<input
-							type="text"
-							value={profile?.github_url || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, github_url: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							LinkedIn URL
-						</label>
-						<input
-							type="text"
-							value={profile?.linkedin_url || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, linkedin_url: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm mb-2 text-muted-foreground">
-							Email
-						</label>
-						<input
-							type="email"
-							value={profile?.email || ""}
-							onChange={(e) =>
-								setProfile({ ...profile, email: e.target.value })
-							}
-							className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-						/>
+
+					{/* Barra de acciones del perfil */}
+					<div className="flex flex-col-reverse items-stretch gap-3 border-t border-border/40 pt-5 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
+						<p className="text-xs text-muted-foreground">
+							Los cambios se publican al guardar.
+						</p>
+						<button
+							onClick={handleSaveProfile}
+							disabled={isSaving.profile}
+							className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
+						>
+							{isSaving.profile ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<Save className="h-4 w-4" />
+							)}
+							{isSaving.profile ? "Guardando..." : "Guardar cambios"}
+						</button>
 					</div>
 				</div>
 			</section>
 
+			{/* Proyectos */}
 			<section>
-				<div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-					<div className="flex items-center gap-4 flex-1">
-						<h2 className="text-xl font-semibold">Tus Proyectos</h2>
-						<span className="px-2 py-1 text-xs bg-accent/10 text-accent rounded-full font-medium">
+				<div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<div className="flex items-center gap-3">
+						<h2 className="text-lg font-semibold">Proyectos</h2>
+						<span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">
 							{filteredProjects.length} / {projects.length}
 						</span>
 					</div>
-					<div className="flex flex-wrap items-center gap-3">
+					<div className="flex flex-wrap items-center gap-2">
 						<div className="relative">
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 							<input
 								type="text"
 								placeholder="Buscar proyectos..."
+								aria-label="Buscar proyectos"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className="w-64 pl-10 pr-4 py-2 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all text-sm"
+								className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent sm:w-60"
 							/>
 						</div>
 						<select
+							aria-label="Filtrar por destacados"
 							value={filterFeatured}
 							onChange={(e) =>
 								setFilterFeatured(
 									e.target.value as typeof filterFeatured,
 								)
 							}
-							className="px-4 py-2 rounded-xl bg-background border border-border focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all text-sm"
+							className="rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 						>
 							<option value="all">Todos</option>
 							<option value="featured">Destacados</option>
 							<option value="unfeatured">Normales</option>
 						</select>
 						<button
-							onClick={() => {
-								const newProject = {
-									title: "",
-									description: "",
-									image_url: "",
-									tech_stack: [],
-									live_url: "",
-									github_url: "",
-									featured: false,
-									order_index: projects.length,
-									isNew: true,
-								};
-								setProjects((prev) => [newProject, ...prev]);
-								setEditingProjectId(Date.now());
-							}}
-							className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/80 transition-colors text-sm whitespace-nowrap"
+							onClick={handleAddProject}
+							className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
 						>
-							<Plus className="w-4 h-4" />
+							<Plus className="h-4 w-4" aria-hidden />
 							Añadir
 						</button>
 					</div>
 				</div>
 
-				{renderProjects()}
+				{filteredProjects.length === 0 ? (
+					<div className="rounded-2xl border border-dashed border-border/60 py-16 text-center">
+						<ImgIcon className="mx-auto mb-4 h-10 w-10 text-muted-foreground/50" />
+						<h3 className="mb-1 font-medium">
+							{searchQuery || filterFeatured !== "all"
+								? "Sin resultados"
+								: "Aún no hay proyectos"}
+						</h3>
+						<p className="mb-5 text-sm text-muted-foreground">
+							{searchQuery || filterFeatured !== "all"
+								? "Prueba con otro término o cambia el filtro."
+								: "Crea tu primer proyecto para mostrarlo en el portafolio."}
+						</p>
+						<button
+							onClick={handleAddProject}
+							className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+						>
+							<Plus className="h-4 w-4" aria-hidden />
+							Añadir proyecto
+						</button>
+					</div>
+				) : (
+					<div className="space-y-3">
+						{filteredProjects.map((project) => {
+							const isEditing = editingKey === project._key;
+							const isSavingProject = isSaving[project._key];
+							const isDeleting = isSaving[`delete-${project._key}`];
+
+							return (
+								<article
+									key={project._key}
+									className={`overflow-hidden rounded-2xl border bg-card/40 transition-colors ${
+										isEditing
+											? "border-accent/50"
+											: "border-border/40"
+									}`}
+								>
+									{/* Fila resumen */}
+									<div className="flex items-center gap-4 p-4">
+										<div
+											role="img"
+											aria-label={`Miniatura de ${project.title || "proyecto"}`}
+											className="h-12 w-12 shrink-0 rounded-xl border border-border/40 bg-secondary/40 bg-cover bg-center"
+											style={{
+												backgroundImage: project.image_url
+													? `url(${project.image_url})`
+													: "none",
+											}}
+										>
+											{!project.image_url && (
+												<div className="flex h-full items-center justify-center text-muted-foreground">
+													<ImgIcon className="h-4 w-4" />
+												</div>
+											)}
+										</div>
+
+										<div className="min-w-0 flex-1">
+											<div className="flex items-center gap-2">
+												<h3 className="truncate font-medium">
+													{project.title ||
+														"Proyecto sin título"}
+												</h3>
+												{project.isNew && (
+													<span className="shrink-0 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
+														Nuevo
+													</span>
+												)}
+												{project.featured && (
+													<span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-500">
+														<Star className="h-3 w-3 fill-current" />
+														Destacado
+													</span>
+												)}
+											</div>
+											{project.description && (
+												<p className="mt-0.5 truncate text-sm text-muted-foreground">
+													{project.description}
+												</p>
+											)}
+										</div>
+
+										<div className="flex shrink-0 items-center gap-1">
+											{project.live_url && (
+												<a
+													href={project.live_url}
+													target="_blank"
+													rel="noopener noreferrer"
+													aria-label={`Ver demo de ${project.title || "este proyecto"}`}
+													className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+												>
+													<ExternalLink
+														className="h-4 w-4"
+														aria-hidden
+													/>
+												</a>
+											)}
+											{project.github_url && (
+												<a
+													href={project.github_url}
+													target="_blank"
+													rel="noopener noreferrer"
+													aria-label={`Ver código de ${project.title || "este proyecto"}`}
+													className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+												>
+													<Github
+														className="h-4 w-4"
+														aria-hidden
+													/>
+												</a>
+											)}
+											<button
+												onClick={() =>
+													setEditingKey(
+														isEditing ? null : project._key,
+													)
+												}
+												aria-label={
+													isEditing
+														? "Cerrar editor"
+														: `Editar ${project.title || "proyecto"}`
+												}
+												title={
+													isEditing
+														? "Cerrar editor"
+														: "Editar"
+												}
+												className={`rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+													isEditing
+														? "bg-accent/10 text-accent"
+														: "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+												}`}
+											>
+												{isEditing ? (
+													<X
+														className="h-4 w-4"
+														aria-hidden
+													/>
+												) : (
+													<Pencil
+														className="h-4 w-4"
+														aria-hidden
+													/>
+												)}
+											</button>
+											<button
+												onClick={() =>
+													setDeleteKey(project._key)
+												}
+												disabled={!project.id || isDeleting}
+												aria-label={`Eliminar ${project.title || "proyecto"}`}
+												title="Eliminar"
+												className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-40"
+											>
+												<Trash2
+													className="h-4 w-4"
+													aria-hidden
+												/>
+											</button>
+										</div>
+									</div>
+
+									{/* Editor */}
+									{isEditing && (
+										<div className="border-t border-border/40 bg-secondary/20 p-5 sm:p-6">
+											<div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+												{/* Columna de imagen */}
+												<div className="flex flex-col gap-3">
+													<div
+														role="img"
+														aria-label="Vista previa de la imagen del proyecto"
+														className="aspect-video w-full rounded-xl border border-border/40 bg-background bg-cover bg-center"
+														style={{
+															backgroundImage:
+																project.image_url
+																	? `url(${project.image_url})`
+																	: "none",
+														}}
+													>
+														{!project.image_url && (
+															<div className="flex h-full items-center justify-center text-muted-foreground">
+																<ImgIcon className="h-6 w-6" />
+															</div>
+														)}
+													</div>
+													<UploadButton
+														endpoint="imageUploader"
+														content={{
+															button: "Subir imagen",
+															allowedContent:
+																"JPG, PNG · máx. 4MB",
+														}}
+														onClientUploadComplete={handleUploaded(
+															project._key,
+														)}
+														onUploadError={uploadError}
+													/>
+													<input
+														type="text"
+														aria-label="URL de la imagen"
+														value={project.image_url || ""}
+														placeholder="o pega una URL..."
+														onChange={(e) =>
+															patchProject(project._key, {
+																image_url:
+																	e.target.value,
+															})
+														}
+														className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+													/>
+												</div>
+
+												{/* Columna de campos */}
+												<div className="grid content-start gap-4 sm:grid-cols-2">
+													<div className="sm:col-span-2">
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															Título
+														</label>
+														<input
+															type="text"
+															aria-label="Título del proyecto"
+															value={project.title || ""}
+															placeholder="Nombre del proyecto"
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		title: e.target
+																			.value,
+																	},
+																)
+															}
+															className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+
+													<div className="sm:col-span-2">
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															Descripción
+														</label>
+														<textarea
+															rows={3}
+															aria-label="Descripción del proyecto"
+															value={
+																project.description ||
+																""
+															}
+															placeholder="Qué es, para quién y qué resuelve."
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		description:
+																			e.target
+																				.value,
+																	},
+																)
+															}
+															className="w-full resize-none rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+
+													<div>
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															Demo URL
+														</label>
+														<input
+															type="text"
+															aria-label="URL de la demo"
+															value={
+																project.live_url || ""
+															}
+															placeholder="https://..."
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		live_url:
+																			e.target
+																				.value,
+																	},
+																)
+															}
+															className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+
+													<div>
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															GitHub URL
+														</label>
+														<input
+															type="text"
+															aria-label="URL del repositorio en GitHub"
+															value={
+																project.github_url || ""
+															}
+															placeholder="https://github.com/..."
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		github_url:
+																			e.target
+																				.value,
+																	},
+																)
+															}
+															className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+
+													<div>
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															Orden
+														</label>
+														<input
+															type="number"
+															min={0}
+															aria-label="Orden del proyecto"
+															value={
+																project.order_index || 0
+															}
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		order_index:
+																			parseInt(
+																				e.target
+																					.value,
+																				10,
+																			) || 0,
+																	},
+																)
+															}
+															className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+
+													<div className="flex items-end">
+														<label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm">
+															<input
+																type="checkbox"
+																checked={
+																	project.featured ||
+																	false
+																}
+																onChange={(e) =>
+																	patchProject(
+																		project._key,
+																		{
+																			featured:
+																				e.target
+																					.checked,
+																		},
+																	)
+																}
+																className="h-4 w-4 accent-accent"
+															/>
+															Destacado
+														</label>
+													</div>
+
+													<div className="sm:col-span-2">
+														<label className="mb-1.5 block text-sm text-muted-foreground">
+															Tecnologías
+														</label>
+														<div className="mb-2 flex flex-wrap gap-2">
+															{TECH_OPTIONS.map(
+																(tech) => {
+																	const active =
+																		project.tech_stack?.includes(
+																			tech,
+																		);
+																	return (
+																		<button
+																			key={tech}
+																			type="button"
+																			aria-pressed={
+																				!!active
+																			}
+																			onClick={() => {
+																				const stack =
+																					project.tech_stack ||
+																					[];
+																				patchProject(
+																					project._key,
+																					{
+																						tech_stack:
+																							active
+																								? stack.filter(
+																										(
+																											t,
+																										) =>
+																											t !==
+																											tech,
+																									)
+																								: [
+																										...stack,
+																										tech,
+																									],
+																					},
+																				);
+																			}}
+																			className={`rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+																				active
+																					? "border-accent bg-accent text-accent-foreground"
+																					: "border-border bg-background hover:border-accent/50"
+																			}`}
+																		>
+																			{tech}
+																		</button>
+																	);
+																},
+															)}
+														</div>
+														<input
+															type="text"
+															aria-label="Tecnologías separadas por coma"
+															value={
+																project.tech_stack?.join(
+																	", ",
+																) || ""
+															}
+															placeholder="O escríbelas separadas por coma"
+															onChange={(e) =>
+																patchProject(
+																	project._key,
+																	{
+																		tech_stack:
+																			e.target.value
+																				.split(
+																					",",
+																				)
+																				.map(
+																					(
+																						t,
+																					) =>
+																						t.trim(),
+																				)
+																				.filter(
+																					Boolean,
+																				),
+																	},
+																)
+															}
+															className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+														/>
+													</div>
+												</div>
+											</div>
+
+											{/* Acciones del editor */}
+											<div className="mt-6 flex items-center justify-end gap-3 border-t border-border/40 pt-5">
+												<button
+													onClick={() =>
+														handleCancelEdit(project)
+													}
+													className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+												>
+													Cancelar
+												</button>
+												<button
+													onClick={() =>
+														handleSaveProject(project)
+													}
+													disabled={isSavingProject}
+													className="inline-flex items-center gap-2 rounded-lg bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
+												>
+													{isSavingProject ? (
+														<Loader2 className="h-4 w-4 animate-spin" />
+													) : (
+														<Save className="h-4 w-4" />
+													)}
+													{isSavingProject
+														? "Guardando..."
+														: project.isNew
+															? "Crear proyecto"
+															: "Guardar cambios"}
+												</button>
+											</div>
+										</div>
+									)}
+
+									{/* Confirmación de borrado */}
+									{deleteKey === project._key && (
+										<div className="flex flex-col gap-3 border-t border-destructive/20 bg-destructive/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+											<div className="flex items-center gap-3">
+												<AlertTriangle className="h-5 w-5 shrink-0 text-destructive" />
+												<div>
+													<p className="text-sm font-medium">
+														{`¿Eliminar "${project.title || "este proyecto"}"?`}
+													</p>
+													<p className="text-xs text-muted-foreground">
+														Esta acción no se puede
+														deshacer.
+													</p>
+												</div>
+											</div>
+											<div className="flex justify-end gap-2">
+												<button
+													onClick={() => setDeleteKey(null)}
+													className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+												>
+													Cancelar
+												</button>
+												<button
+													onClick={() =>
+														handleDeleteProject(project)
+													}
+													disabled={isDeleting}
+													className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
+												>
+													{isDeleting
+														? "Eliminando..."
+														: "Sí, eliminar"}
+												</button>
+											</div>
+										</div>
+									)}
+								</article>
+							);
+						})}
+					</div>
+				)}
 			</section>
 		</div>
 	);

@@ -109,6 +109,30 @@ export async function initDb() {
       `;
 		}
 
+		// Asegura el proyecto destacado principal (idempotente, se puede re-ejecutar).
+		const { rows: featuredRows } =
+			await sql`SELECT id FROM projects WHERE title = 'Carvin Ofertas' LIMIT 1`;
+		if (featuredRows.length === 0) {
+			await sql`
+        INSERT INTO projects (title, description, image_url, tech_stack, live_url, github_url, featured, order_index)
+        VALUES (
+          'Carvin Ofertas',
+          'Agregador de ofertas afiliadas de Amazon, AliExpress y MercadoLibre. Verifica precios históricos y lleva al comprador directo a la tienda oficial (ruta /go). Catálogo con scraping automático cada 30 min, búsqueda, wishlist, ofertas flash en tiempo real, panel de administración, SEO completo y monetización con AdSense.',
+          'https://www.carvinofertas.com/og-default.png',
+          ARRAY['Next.js', 'TypeScript', 'PostgreSQL', 'Drizzle ORM', 'Neon', 'Tailwind CSS', 'Better Auth', 'Pusher', 'UploadThing', 'Sentry'],
+          'https://www.carvinofertas.com/',
+          NULL,
+          true,
+          0
+        )
+      `;
+		} else {
+			await sql`
+        UPDATE projects SET featured = true, order_index = 0
+        WHERE title = 'Carvin Ofertas'
+      `;
+		}
+
 		// Insert seed blog posts if not exists
 		const { rows: postRows } = await sql`SELECT COUNT(*) FROM posts`;
 		if (parseInt(postRows[0].count) === 0) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { X, Cookie } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -8,12 +9,16 @@ const CONSENT_KEY = "cpv_cookie_consent";
 const CONSENT_EVENT = "cpv-cookie-consent-change";
 
 export function CpvCookieConsent() {
+	const pathname = usePathname();
+	const isAdmin = pathname?.startsWith("/admin") ?? false;
 	const [show, setShow] = useState(false);
 
 	useEffect(() => {
+		if (isAdmin) return;
+
 		const consent = localStorage.getItem(CONSENT_KEY);
 		if (consent === null) setShow(true);
-	}, []);
+	}, [isAdmin]);
 
 	const accept = () => {
 		localStorage.setItem(CONSENT_KEY, "true");
@@ -29,7 +34,7 @@ export function CpvCookieConsent() {
 
 	return (
 		<AnimatePresence>
-			{show && (
+			{show && !isAdmin && (
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}

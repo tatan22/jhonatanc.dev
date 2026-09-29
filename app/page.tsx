@@ -7,6 +7,7 @@ import { Services } from "@/components/services";
 import { About } from "@/components/about";
 import { Workflow } from "@/components/workflow";
 import { TechStack } from "@/components/tech-stack";
+import { Faq } from "@/components/faq";
 import { Contact } from "@/components/contact";
 import { Footer } from "@/components/footer";
 
@@ -34,6 +35,7 @@ export default async function Home() {
 			<About />
 			<Workflow />
 			<TechStack />
+			<Faq />
 			<Contact />
 			<Footer />
 		</main>

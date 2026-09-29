@@ -1,14 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { sendGTMEvent } from "@next/third-parties/google";
 
 export function ExitIntentPopup() {
+	const pathname = usePathname();
+	const isAdmin = pathname?.startsWith("/admin") ?? false;
 	const [isOpen, setIsOpen] = useState(false);
 	const [hasTriggered, setHasTriggered] = useState(false);
 
 	useEffect(() => {
+		if (isAdmin) return;
+
 		const handleMouseOut = (e: MouseEvent) => {
 			if (!hasTriggered && e.clientY < 10 && e.relatedTarget === null) {
 				setIsOpen(true);
@@ -27,9 +32,9 @@ export function ExitIntentPopup() {
 			document.removeEventListener("mouseout", handleMouseOut);
 			document.removeEventListener("keydown", handleEscape);
 		};
-	}, [hasTriggered]);
+	}, [hasTriggered, isAdmin]);
 
-	if (!isOpen) return null;
+	if (!isOpen || isAdmin) return null;
 
 	return (
 		<div

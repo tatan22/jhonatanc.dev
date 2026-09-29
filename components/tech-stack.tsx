@@ -23,7 +23,11 @@ export function TechStack() {
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
 
 	return (
-		<section id="stack" className="relative overflow-hidden py-32" ref={ref}>
+		<section
+			id="stack"
+			className="relative overflow-hidden py-16 md:py-24 lg:py-32"
+			ref={ref}
+		>
 			<div className="absolute inset-0 bg-linear-to-b from-transparent via-accent/5 to-transparent" />
 			<div className="max-w-6xl mx-auto px-6">
 				<motion.div

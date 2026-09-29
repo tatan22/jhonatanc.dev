@@ -3,19 +3,24 @@
 import { MessageCircle } from "lucide-react";
 import { sendGTMEvent } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export function FloatingCTA() {
+	const pathname = usePathname();
+	const isAdmin = pathname?.startsWith("/admin") ?? false;
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
+		if (isAdmin) return;
+
 		const handleScroll = () => {
 			setIsVisible(window.scrollY > 300);
 		};
 		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
+	}, [isAdmin]);
 
-	if (!isVisible) return null;
+	if (!isVisible || isAdmin) return null;
 
 	return (
 		<a

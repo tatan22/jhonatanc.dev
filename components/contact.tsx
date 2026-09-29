@@ -65,7 +65,7 @@ export function Contact() {
 	};
 
 	return (
-		<section id="contact" className="py-32 relative" ref={ref}>
+		<section id="contact" className="py-16 md:py-24 lg:py-32 relative" ref={ref}>
 			<div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/2 to-transparent" />
 
 			<div className="relative max-w-6xl mx-auto px-6">

@@ -7,7 +7,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: blob: https: https://utfs.io https://cdn.utfs.io https://ufs.sh https://lh3.googleusercontent.com;
   font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://vercel.live wss://vercel.live https://utfs.io https://cdn.utfs.io https://ufs.sh;
+  connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://vercel.live wss://vercel.live https://utfs.io https://cdn.utfs.io https://ufs.sh https://*.ufs.sh https://uploadthing.com https://*.uploadthing.com https://api.uploadthing.com;
   frame-src https://vercel.live;
   object-src 'none';
   base-uri 'self';
@@ -38,6 +38,8 @@ const nextConfig = {
 			{ protocol: "https", hostname: "lh3.googleusercontent.com" },
 			{ protocol: "https", hostname: "images.unsplash.com" },
 			{ protocol: "https", hostname: "picsum.photos" },
+			{ protocol: "https", hostname: "www.carvinofertas.com" },
+			{ protocol: "https", hostname: "carvinofertas.com" },
 		],
 	},
 	async headers() {

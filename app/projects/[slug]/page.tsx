@@ -5,9 +5,8 @@ import { notFound } from "next/navigation";
 import { ExternalLink, Github, ArrowLeft } from "lucide-react";
 
 import { getProjectById, getProjects, projectSlug } from "@/lib/db";
+import { SITE_URL } from "@/lib/site";
 import { ViewItemTracker } from "@/components/analytics";
-
-const SITE_URL = "https://jhonatanc-dev.vercel.app";
 
 export const revalidate = 300;
 
@@ -88,11 +87,35 @@ export default async function ProjectPage({ params }: Props) {
 		codeRepository: project.github_url || undefined,
 	};
 
+	const breadcrumbLd = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Inicio", item: `${SITE_URL}/` },
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Proyectos",
+				item: `${SITE_URL}/#projects`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
+				name: project.title,
+				item: canonicalUrl,
+			},
+		],
+	};
+
 	return (
 		<main id="main-content" tabIndex={-1} className="min-h-screen bg-background">
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
 			/>
 			<ViewItemTracker id={project.id} name={project.title} />
 			<article className="max-w-4xl mx-auto px-6 pt-32 pb-24">

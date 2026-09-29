@@ -19,6 +19,25 @@ type FallbackProject = {
 
 const fallbackProjects: FallbackProject[] = [
 	{
+		title: "Carvin Ofertas",
+		description:
+			"Agregador de ofertas afiliadas de Amazon, AliExpress y MercadoLibre. Verifica precios y lleva al comprador directo a la tienda oficial. Catálogo con scraping automático, búsqueda, wishlist, ofertas flash en tiempo real y monetización con AdSense.",
+		image: "https://www.carvinofertas.com/og-default.png",
+		tech: [
+			"Next.js",
+			"TypeScript",
+			"PostgreSQL",
+			"Drizzle ORM",
+			"Neon",
+			"Tailwind CSS",
+			"Better Auth",
+			"Pusher",
+		],
+		liveUrl: "https://www.carvinofertas.com/",
+		githubUrl: "#",
+		featured: true,
+	},
+	{
 		title: "Veloce",
 		description:
 			"Marketplace premium de vehículos para el Eje Cafetero con enfoque moderno, minimalista y responsive.",
@@ -72,7 +91,7 @@ export function Projects({ initialProjects }: { initialProjects?: Project[] }) {
 			: fallbackProjects;
 
 	return (
-		<section id="projects" className="py-32 relative" ref={ref}>
+		<section id="projects" className="py-16 md:py-24 lg:py-32 relative" ref={ref}>
 			<div className="max-w-6xl mx-auto px-6">
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}

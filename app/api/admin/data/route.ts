@@ -27,6 +27,29 @@ const FALLBACK_PROFILE = {
 
 const FALLBACK_PROJECTS = [
 	{
+		id: 0,
+		title: "Carvin Ofertas",
+		description:
+			"Agregador de ofertas afiliadas de Amazon, AliExpress y MercadoLibre. Verifica precios históricos y lleva al comprador directo a la tienda oficial (ruta /go). Catálogo con scraping automático cada 30 min, búsqueda, wishlist, ofertas flash en tiempo real, panel de administración, SEO completo y monetización con AdSense.",
+		image_url: "https://www.carvinofertas.com/og-default.png",
+		tech_stack: [
+			"Next.js",
+			"TypeScript",
+			"PostgreSQL",
+			"Drizzle ORM",
+			"Neon",
+			"Tailwind CSS",
+			"Better Auth",
+			"Pusher",
+			"UploadThing",
+			"Sentry",
+		],
+		live_url: "https://www.carvinofertas.com/",
+		github_url: null,
+		featured: true,
+		order_index: 0,
+	},
+	{
 		id: 1,
 		title: "Meetly",
 		description:
@@ -112,14 +135,23 @@ export async function PUT(request: Request) {
 
 	try {
 		if (type === "profile") {
-			const { name, role, bio, image_url, location } = data as Record<
-				string,
-				string
-			>;
+			const {
+				name,
+				role,
+				bio,
+				image_url,
+				location,
+				email,
+				github_url,
+				linkedin_url,
+				resume_url,
+			} = data as Record<string, string | null | undefined>;
 			try {
 				await sql`
           UPDATE profiles 
-          SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url}, location = ${location}
+          SET name = ${name}, role = ${role}, bio = ${bio}, image_url = ${image_url},
+              location = ${location}, email = ${email}, github_url = ${github_url},
+              linkedin_url = ${linkedin_url}, resume_url = ${resume_url}
           WHERE id = (SELECT id FROM profiles ORDER BY id LIMIT 1)
         `;
 				revalidatePath("/");

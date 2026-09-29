@@ -28,7 +28,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 				}}
 			/>
 
-			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 md:pt-28 pb-12 md:pb-16">
+			<div className="relative z-10 max-w-6xl mx-auto px-6 pt-28 md:pt-32 pb-16 md:pb-20">
 				<div className="flex flex-col-reverse lg:flex-row items-center gap-10">
 					{/* Content */}
 					<div className="flex-1 text-center lg:text-left mt-8 lg:mt-0 flex flex-col lg:block">
@@ -219,15 +219,15 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 1 }}
-				className="absolute bottom-8 left-1/2 -translate-x-1/2"
+				className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:block"
 			>
-				<motion.div
-					animate={{ y: [0, 8, 0] }}
-					transition={{ duration: 1.5, repeat: Infinity }}
-					className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center pt-2"
-				>
-					<motion.div className="w-1.5 h-1.5 bg-accent rounded-full" />
-				</motion.div>
+				<div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center pt-2">
+					<motion.div
+						animate={{ y: [0, 8, 0] }}
+						transition={{ duration: 1.5, repeat: Infinity }}
+						className="w-1.5 h-1.5 bg-accent rounded-full"
+					/>
+				</div>
 			</motion.div>
 		</section>
 	);
