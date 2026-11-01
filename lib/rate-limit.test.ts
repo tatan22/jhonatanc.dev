@@ -34,21 +34,42 @@ describe("rateLimit", () => {
 });
 
 describe("clientIp", () => {
-	it("lee x-forwarded-for (primera IP)", () => {
+	it("prioriza x-real-ip sobre x-forwarded-for", () => {
 		const req = new Request("http://localhost", {
-			headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
-		});
-		expect(clientIp(req)).toBe("1.2.3.4");
-	});
-
-	it("cae a x-real-ip si no hay forwarded", () => {
-		const req = new Request("http://localhost", {
-			headers: { "x-real-ip": "9.9.9.9" },
+			headers: {
+				"x-real-ip": "9.9.9.9",
+				"x-forwarded-for": "1.2.3.4, 5.6.7.8",
+			},
 		});
 		expect(clientIp(req)).toBe("9.9.9.9");
 	});
 
+	it("usa el último valor de x-forwarded-for (el que agrega el proxy)", () => {
+		const req = new Request("http://localhost", {
+			headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
+		});
+		expect(clientIp(req)).toBe("5.6.7.8");
+	});
+
+	it("ignora un x-forwarded-for forjado al inicio", () => {
+		const req = new Request("http://localhost", {
+			headers: { "x-forwarded-for": "6.6.6.6, 9.9.9.9" },
+		});
+		const legit = new Request("http://localhost", {
+			headers: { "x-forwarded-for": "1.1.1.1, 9.9.9.9" },
+		});
+		expect(clientIp(req)).toBe("9.9.9.9");
+		expect(clientIp(req)).toBe(clientIp(legit));
+	});
+
 	it("devuelve unknown sin headers", () => {
 		expect(clientIp(new Request("http://localhost"))).toBe("unknown");
+	});
+
+	it("devuelve unknown si los headers están vacíos", () => {
+		const req = new Request("http://localhost", {
+			headers: { "x-real-ip": "  ", "x-forwarded-for": " , " },
+		});
+		expect(clientIp(req)).toBe("unknown");
 	});
 });

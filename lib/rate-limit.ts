@@ -55,7 +55,16 @@ export function rateLimit(
 
 /** Extrae la IP real del cliente detrás de proxies (Vercel/Cloudflare). */
 export function clientIp(request: Request): string {
+	const realIp = request.headers.get("x-real-ip");
+	if (realIp?.trim()) return realIp.trim();
+
+	// Solo el último valor lo agrega el proxy: los anteriores los controla el cliente.
 	const forwarded = request.headers.get("x-forwarded-for");
-	if (forwarded) return forwarded.split(",")[0].trim();
-	return request.headers.get("x-real-ip") || "unknown";
+	if (forwarded) {
+		const parts = forwarded.split(",");
+		const last = parts[parts.length - 1].trim();
+		if (last) return last;
+	}
+
+	return "unknown";
 }
