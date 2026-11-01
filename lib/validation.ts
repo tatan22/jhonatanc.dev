@@ -21,3 +21,33 @@ export const contactSchema = z.object({
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
+
+// Vacío, null o undefined se aceptan; cualquier valor debe empezar con https://
+export const httpsUrlSchema = z
+	.string()
+	.trim()
+	.nullish()
+	.refine((value) => !value || value.startsWith("https://"), "URL inválida");
+
+export const techStackSchema = z
+	.unknown()
+	.refine(
+		(value): value is string[] =>
+			Array.isArray(value) && value.every((item) => typeof item === "string"),
+		{ message: "tech_stack inválido" },
+	);
+
+export const profileUpdateSchema = z.object({
+	github_url: httpsUrlSchema,
+	linkedin_url: httpsUrlSchema,
+	resume_url: httpsUrlSchema,
+});
+
+export const projectUpdateSchema = z.object({
+	tech_stack: techStackSchema,
+	live_url: httpsUrlSchema,
+	github_url: httpsUrlSchema,
+});
+
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+export type ProjectUpdateInput = z.infer<typeof projectUpdateSchema>;

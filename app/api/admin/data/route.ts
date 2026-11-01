@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getProfile, getProjects } from "@/lib/db";
 import { ADMIN_SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { profileUpdateSchema, projectUpdateSchema } from "@/lib/validation";
 
 // Verificación independiente del middleware (defensa en profundidad)
 async function isAuthenticated() {
@@ -135,6 +136,10 @@ export async function PUT(request: Request) {
 
 	try {
 		if (type === "profile") {
+			const parsed = profileUpdateSchema.safeParse(data);
+			if (!parsed.success)
+				return NextResponse.json({ error: "URL inválida" }, { status: 400 });
+
 			const {
 				name,
 				role,
@@ -164,6 +169,21 @@ export async function PUT(request: Request) {
 				);
 			}
 		} else if (type === "project") {
+			const parsed = projectUpdateSchema.safeParse(data);
+			if (!parsed.success) {
+				const invalidTechStack = parsed.error.issues.some(
+					(issue) => issue.path[0] === "tech_stack",
+				);
+				return NextResponse.json(
+					{
+						error: invalidTechStack
+							? "tech_stack inválido"
+							: "URL inválida",
+					},
+					{ status: 400 },
+				);
+			}
+
 			const {
 				id,
 				title,
@@ -214,6 +234,21 @@ export async function POST(request: Request) {
 
 	try {
 		if (type === "project") {
+			const parsed = projectUpdateSchema.safeParse(data);
+			if (!parsed.success) {
+				const invalidTechStack = parsed.error.issues.some(
+					(issue) => issue.path[0] === "tech_stack",
+				);
+				return NextResponse.json(
+					{
+						error: invalidTechStack
+							? "tech_stack inválido"
+							: "URL inválida",
+					},
+					{ status: 400 },
+				);
+			}
+
 			const {
 				title,
 				description,
