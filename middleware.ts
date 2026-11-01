@@ -7,7 +7,7 @@ const RATE_LIMITED_AUTH_PATHS = [
 	"/api/auth/forget-password",
 	"/api/auth/reset-password",
 	"/api/admin/login",
-	"/api/admin/setup",
+	"/api/setup",
 ];
 
 export const config = {
