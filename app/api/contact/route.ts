@@ -62,7 +62,10 @@ export async function POST(request: Request) {
 
 		if (error) {
 			console.error("[contact] resend error:", error.message);
-			return NextResponse.json({ error: error.message }, { status: 400 });
+			return NextResponse.json(
+				{ error: "No se pudo enviar el mensaje. Intentá más tarde." },
+				{ status: 400 },
+			);
 		}
 
 		return NextResponse.json({ success: true });
