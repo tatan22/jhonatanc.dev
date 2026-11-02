@@ -3,7 +3,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://vercel.live;
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://vercel.live;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: blob: https: https://utfs.io https://cdn.utfs.io https://ufs.sh https://lh3.googleusercontent.com;
   font-src 'self' data: https://fonts.gstatic.com;
