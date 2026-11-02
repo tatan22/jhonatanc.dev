@@ -3,8 +3,6 @@ import { Resend } from "resend";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { contactSchema } from "@/lib/validation";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
 	try {
 		// Rate limit: 3 envíos por hora por IP (anti-spam)
@@ -51,6 +49,8 @@ export async function POST(request: Request) {
 				{ status: 503 },
 			);
 		}
+
+		const resend = new Resend(process.env.RESEND_API_KEY);
 
 		const { error } = await resend.emails.send({
 			from: "Portafolio Contacto <onboarding@resend.dev>",
