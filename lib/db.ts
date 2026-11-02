@@ -93,7 +93,7 @@ export async function initDb() {
 		if (parseInt(rows[0].count) === 0) {
 			await sql`
         INSERT INTO profiles (name, role, bio, image_url, location)
-        VALUES ('Jhonatan Cardona Duarte', 'Front-End Developer', 'Ingeniero Físico y Desarrollador Front-End enfocado en crear interfaces modernas, experiencias intuitivas y aplicaciones web con React, Next.js y TypeScript.', '/profile.webp', '📍 Pereira, Colombia')
+        VALUES ('Jhonatan Cardona Duarte', 'Full-Stack TypeScript Engineer', 'Ingeniero Físico y Desarrollador Front-End enfocado en crear interfaces modernas, experiencias intuitivas y aplicaciones web con React, Next.js y TypeScript.', '/profile.webp', '📍 Pereira, Colombia')
       `;
 		}
 

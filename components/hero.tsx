@@ -41,7 +41,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 							{profile?.name || "Jhonatan Cardona Duarte"}
 							<br />
 							<span className="font-bold bg-linear-to-l from-accent to-blue-400 bg-clip-text text-transparent mt-2 block">
-								{profile?.role || "Front-End Developer"}
+								{profile?.role || "Full-Stack TypeScript Engineer"}
 							</span>
 						</motion.h1>
 
