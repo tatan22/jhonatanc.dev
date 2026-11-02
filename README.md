@@ -90,7 +90,7 @@ Convertirme en Full-Stack Developer capaz de construir productos SaaS reales y t
 ## 📫 Contacto
 
 - LinkedIn: Jhonatan Cardona Duarte
-- Email: <tatancarduar@hotmail.com>
+- Email: <tatancarduar@gmail.com>
 - GitHub: @tatan22
 
 ---

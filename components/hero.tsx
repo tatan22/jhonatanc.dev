@@ -141,7 +141,7 @@ export function Hero({ profile }: { profile?: Profile | null }) {
 								},
 								{
 									icon: Mail,
-									href: "mailto:tatancarduar@hotmail.com",
+									href: "mailto:tatancarduar@gmail.com",
 									label: "Email",
 								},
 							].map(({ icon: Icon, href, label }) => (
